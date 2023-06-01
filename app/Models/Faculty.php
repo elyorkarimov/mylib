@@ -71,6 +71,13 @@ class Faculty extends Model implements TranslatableContract
     {
         return $this->hasMany('App\Models\FacultyTranslation', 'faculty_id', 'id');
     }
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function profiles()
+    {
+        return $this->hasMany('App\Models\UserProfile', 'faculty_id', 'id');
+    }
     
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
@@ -79,7 +86,7 @@ class Faculty extends Model implements TranslatableContract
     {
         return $this->hasOne('App\Models\Organization', 'id', 'organization_id');
     }
-    
+     
     
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,6 +20,7 @@ use Illuminate\Support\Facades\DB;
  * @property $dc_creators
  * @property $dc_authors
  * @property $dc_UDK
+ * @property $uk
  * @property $dc_BBK
  * @property $dc_source
  * @property $dc_rights
@@ -39,6 +41,7 @@ use Illuminate\Support\Facades\DB;
  * @property $betlar_soni
  * @property $price
  * @property $status
+ * @property $location_index
  * @property $published_year
  * @property $extra1
  * @property $extra2
@@ -68,6 +71,7 @@ use Illuminate\Support\Facades\DB;
  */
 class Book extends Model
 {
+    
     use Sluggable;
     static $rules = [
         'dc_title' => 'required',
@@ -75,7 +79,6 @@ class Book extends Model
         'price' => 'required',
         'status' => 'required',
         'slug' => 'required',
-
     ];
 
 
@@ -84,7 +87,7 @@ class Book extends Model
      *
      * @var array
      */
-    protected $fillable = ['dc_title', 'authors_mark', 'slug', 'dc_subjects', 'dc_creators', 'dc_authors', 'dc_UDK', 'dc_BBK', 'dc_source', 'dc_rights', 'dc_relation', 'dc_publisher', 'dc_identifier', 'dc_published_city', 'ISBN', 'dc_description', 'dc_date', 'dc_coverage', 'dc_contributor', 'image_path', 'full_text_path', 'file_format', 'file_format_type', 'file_size', 'betlar_soni', 'price', 'status', 'published_year', 'extra1', 'extra2', 'extra3', 'extra4', 'books_type_id', 'book_language_id', 'book_text_id', 'book_text_type_id', 'book_access_type_id', 'book_file_type_id', 'created_by', 'updated_by', 'where_id', 'who_id', 'subject_id'];
+    protected $fillable = ['dc_title', 'authors_mark', 'slug', 'dc_subjects', 'dc_creators', 'dc_authors', 'dc_UDK', 'dc_BBK', 'dc_source', 'dc_rights', 'dc_relation', 'dc_publisher', 'dc_identifier', 'dc_published_city', 'ISBN', 'dc_description', 'dc_date', 'dc_coverage', 'dc_contributor', 'image_path', 'full_text_path', 'file_format', 'file_format_type', 'file_size', 'betlar_soni', 'price', 'status', 'published_year', 'extra1', 'extra2', 'extra3', 'extra4', 'books_type_id', 'book_language_id', 'book_text_id', 'book_text_type_id', 'book_access_type_id', 'book_file_type_id', 'created_by', 'updated_by', 'where_id', 'who_id', 'subject_id', 'uk', 'location_index', 'circulation', 'printing_plate'];
     /**
      * Return the sluggable configuration array for this model.
      *
@@ -114,7 +117,10 @@ class Book extends Model
     {
         return $this->hasOne('App\Models\BookAccessType', 'id', 'book_access_type_id');
     }
-
+    // public function bookAccessType()
+    // {
+    //  return $this->belongsTo(BookAccessType::class);
+    // }
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
@@ -206,12 +212,24 @@ class Book extends Model
         }
         return 0;
     }
+    
+    public function scopeTotalAllPdf()
+    {
+        $model = self::where('full_text_path', '<>', "");        
+        return $model->count();
+    }
+    public function scopeTotalAllDcSourcePdf()
+    { 
+        $model = self::where('dc_source', '<>', "");
+        
+        return $model->count();
+    }
 
     /**
      * This is model Observer which helps to do the same actions automatically when you creating or updating models
      *
      * @var array
-     */
+     */ 
     protected static function boot()
     {
         parent::boot();
@@ -230,7 +248,37 @@ class Book extends Model
             $model->updated_by = Auth::id();
         });
     }
+    public static function GetCountBookByBookTypeByMonthAndId($id = null, $year, $month)
+    {
+        $from = $year . '-' . $month;
+        $to = $year . '-' . $month;
 
+        $startDate = Carbon::createFromFormat('Y-m', $from)->startOfMonth();
+        $endDate = Carbon::createFromFormat('Y-m', $to)->endOfMonth();
+
+        $cards = DB::select("SELECT SUM(COUNT(DISTINCT id)) OVER() as nomda FROM `books` where status=1 and DATE(created_at) between '$startDate' and '$endDate' GROUP by id limit 1;");
+
+        if (count($cards) > 0) {
+            return $cards[0]->nomda;
+        }
+        return 0;
+    }
+
+    public static function GetCountBookCopiesByBookTypeByMonthAndId($id = null, $year, $month)
+    {
+        $from = $year . '-' . $month;
+        $to = $year . '-' . $month;
+
+        $startDate = Carbon::createFromFormat('Y-m', $from)->startOfMonth();
+        $endDate = Carbon::createFromFormat('Y-m', $to)->endOfMonth();
+
+        $cards = DB::select("SELECT SUM(COUNT(DISTINCT id)) OVER() as nusxa FROM `book_inventars` as bi where bi.isActive=1 and DATE(bi.created_at) between '$startDate' and '$endDate' GROUP by bi.id LIMIT 1");
+
+        if (count($cards) > 0) {
+            return $cards[0]->nusxa;
+        }
+        return 0;
+    }
     public static function GetData(Request $request)
     {
         $data = [];
@@ -242,6 +290,8 @@ class Book extends Model
         }
 
         $data['isActive'] = $request->input('isActive');
+        $data['circulation'] = $request->input('circulation');
+        $data['printing_plate'] = $request->input('printing_plate');
         return $data;
     }
     public static function rules()
@@ -256,8 +306,10 @@ class Book extends Model
     public static function GetBibliographicById($id)
     {
         $book = self::find($id);
+       
         if ($book != null) {
             $bibliographicdata = '';
+            $bibliographicdata.=$book->location_index.'&nbsp; '.$book->authors_mark.'&nbsp;';
             if ($book->dc_authors) {
                 $all_authors = '';
                 foreach (json_decode($book->dc_authors) as $key => $value) {
@@ -289,12 +341,45 @@ class Book extends Model
             if ($book->betlar_soni) {
                 $bibliographicdata .= '. <span class="dashes">-</span>' . $book->betlar_soni . ' bet.';
             }
-
-
-
-
+ 
             return $bibliographicdata;
         }
         return null;
+    }
+
+
+    public static function GetBookTopTemplateById($id)
+    {
+        $book = self::with(['booksType', 'booksType.translations'])->find($id);
+        if($book != null){
+            $all_authors = '';
+            if ($book->dc_authors) {
+                foreach (json_decode($book->dc_authors) as $key => $value) {
+                    $all_authors .= $value . ' ';
+                }
+            }
+            $image='<img src="/book_no_photo.jpg" alt="image-description img-fluid d-block mx-auto attachment-shop_catalog size-shop_catalog wp-post-image img-fluid" width="120">';
+            if ($book->image_path){
+                $image='<img src="/storage/'.$book->image_path.'" alt="image-description img-fluid d-block mx-auto attachment-shop_catalog size-shop_catalog wp-post-image img-fluid" width="120">';
+            }
+            $link=url(app()->getLocale() . '/books/' . $book->id);
+
+            return '<div class="product product__card border-right">
+            <div class="media p-3 p-md-4d875">
+                <a href="'.$link.'" class="d-block">
+                    '.$image.'
+                </a>
+                <div class="media-body ml-4d875">
+                    <div class="text-uppercase font-size-1 mb-1 text-truncate"><a href="'.$link.'">'.$book->booksType->title.'</a></div>
+                    <h2 class="woocommerce-loop-product__title h6 text-lh-md mb-1 text-height-2 crop-text-2 h-dark"><a href="'.$link.'">'.$book->dc_title.'</a></h2>
+                    <div class="font-size-2 mb-1 text-truncate"><a href="'.$link.'" class="text-gray-700">'.$all_authors.'</a></div>
+                    <div class="price d-flex align-items-center font-weight-medium font-size-3">
+                        <span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol"></span></span>
+                    </div>
+                </div>
+            </div>
+        </div>';
+        }
+
     }
 }

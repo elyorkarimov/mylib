@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class Debtor
@@ -143,7 +145,7 @@ class Debtor extends Model
         static::updating(function ($model) {
             $model->updated_by = Auth::id();
         });
-    } 
+    }
     public static function GetStatus($status)
     {
         if($status==self::$GIVEN){
@@ -154,9 +156,36 @@ class Debtor extends Model
             return __("DELETED");
         }
         return __("UNKNOWN");
-
     }
     
+    public static function GetStatusCount($reader_id, $from, $to, $status)
+    {
+        $statdebtor_by_reader = Debtor::with(['reader', 'reader.profile'])->where('reader_id', '=', $reader_id)->where('status', '=', $status)->whereBetween(DB::raw('DATE(taken_time)'), [$from, $to])->get();
 
+        return $statdebtor_by_reader->count();
+    }
+
+    public static function GetStatusCountById($reader_id, $status)
+    {
+        $statdebtor_by_reader = Debtor::with(['reader', 'reader.profile'])->where('reader_id', '=', $reader_id)->where('status', '=', $status)->get();
+
+        return $statdebtor_by_reader->count();
+    }
+
+    public static function GetCountBookByBookTypeByMonthAndIdAndStatus($id = null, $year, $month, $status)
+    {
+        $from = $year . '-' . $month;
+        $to = $year . '-' . $month;
+
+        $startDate = Carbon::createFromFormat('Y-m', $from)->startOfMonth();
+        $endDate = Carbon::createFromFormat('Y-m', $to)->endOfMonth();
+
+        $cards = DB::select("SELECT SUM(COUNT(DISTINCT d.book_id)) OVER() as nomda FROM `debtors` as d left JOIN books as b on b.id =d.book_id left join books_types as bt on bt.id=b.books_type_id where b.status=1 and d.status=$status and bt.isActive=1 and bt.id=$id and d.taken_time between '$startDate' and '$endDate' GROUP by d.book_id limit 1;");
+
+        if (count($cards) > 0) {
+            return $cards[0]->nomda;
+        }
+        return 0;
+    }
 
 }

@@ -88,6 +88,7 @@ class UserProfile extends Model
     {
         return $this->hasOne('App\Models\Faculty', 'id', 'faculty_id');
     }
+
     
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
@@ -113,14 +114,18 @@ class UserProfile extends Model
         return $this->hasOne('App\Models\ReferenceGender', 'id', 'gender_id');
     }
     
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
-     */
+    // /**
+    //  * @return \Illuminate\Database\Eloquent\Relations\HasOne
+    //  */
+    // public function user()
+    // {
+    //     return $this->hasOne('App\Models\User', 'id', 'user_id');
+    // }
+    
     public function user()
     {
-        return $this->hasOne('App\Models\User', 'id', 'user_id');
+        return $this->belongsTo(User::class);
     }
-    
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */

@@ -29,13 +29,16 @@ class MyProfile extends Component
         $this->user = Auth::user();
         $this->user_id=$user_id;
         $this->userProfile = $this->user->profile;
-        $this->user_old_image=$this->userProfile->image;
-        $this->phone_number=$this->userProfile->phone_number;
-        $this->branch_id=$this->userProfile->branch_id;
-        $this->department_id=$this->userProfile->department_id;
-        $this->gender_id=$this->userProfile->gender_id;
-        $this->date_of_birth=$this->userProfile->date_of_birth;
-        $this->course=$this->userProfile->kursi;
+        if($this->userProfile != null){
+            $this->user_old_image=$this->userProfile->image;
+            $this->phone_number=$this->userProfile->phone_number;
+            $this->branch_id=$this->userProfile->branch_id;
+            $this->department_id=$this->userProfile->department_id;
+            $this->gender_id=$this->userProfile->gender_id;
+            $this->date_of_birth=$this->userProfile->date_of_birth;
+            $this->course=$this->userProfile->kursi;
+    
+        }
         $this->name=$this->user->name;
         $this->email=$this->user->email;
        

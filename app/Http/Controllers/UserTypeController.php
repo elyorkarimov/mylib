@@ -11,18 +11,26 @@ use Illuminate\Http\Request;
  */
 class UserTypeController extends Controller
 {
-    /**
+        /**
      * create a new instance of the class
      *
      * @return void
      */
     function __construct()
     {
-        // $this->middleware('permission:list|create|edit|delete', ['only' => ['index', 'store']]);
-        // $this->middleware('permission:create', ['only' => ['create', 'store']]);
-        // $this->middleware('permission:edit', ['only' => ['edit', 'update']]);
-        // $this->middleware('permission:delete', ['only' => ['destroy']]);
+        $this->middleware(['role:SuperAdmin|Admin|Manager']);
+
+        // $this->middleware('permission:list|create|edit|delete|user-list|user-create|user-edit|user-delete', ['only' => ['index', 'store']]);
+        // $this->middleware('permission:create|user-create', ['only' => ['create', 'store']]);
+        // $this->middleware('permission:edit|user-edit', ['only' => ['edit', 'update']]);
+        // $this->middleware('permission:delete|user-delete', ['only' => ['destroy']]);
         // $this->middleware('permission:deletedb', ['only' => ['destroyDB']]);
+        //  $this->middleware('permission:list|create|edit|delete', ['only' => ['index', 'store']]);
+        //  $this->middleware('permission:create', ['only' => ['create', 'store']]);
+        //  $this->middleware('permission:edit', ['only' => ['edit', 'update']]);
+        //  $this->middleware('permission:delete', ['only' => ['destroy']]);
+        //  $this->middleware('permission:deletedb', ['only' => ['destroyDB']]);
+
     }
     /**
      * Display a listing of the resource.
@@ -32,8 +40,8 @@ class UserTypeController extends Controller
     public function index()
     {
         $perPage = 20;
-        $userTypes = UserType::orderBy('id', 'desc')->paginate($perPage);
-
+        $userTypes = UserType::with('translations')->withCount('users')->orderBy('id', 'desc')->paginate($perPage);
+ 
         return view('user-type.index', compact('userTypes'))
             ->with('i', (request()->input('page', 1) - 1) * $userTypes->perPage());
     }

@@ -422,11 +422,13 @@ See https://github.com/adobe-type-tools/cmap-resources
 
 
 <!-- outerContainer -->
-
+ 
 <script src="{{ asset('pdf-view/pdfjs/compatibility.js')}}"></script>
 <!-- This snippet is used in production (included from viewer.html) -->
 <link rel="resource" type="application/l10n" href="{{ asset('pdf-view/pdfjs/locale/locale.properties')}}"/>
-<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+{{-- <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script> --}}
+<script src="{{ asset('admin/plugins/jquery/jquery.min.js') }}"></script>
+
 <script src="{{ asset('pdf-view/turnjs/turn.min.js')}}"></script>
 <script src="{{ asset('pdf-view/turnjs/zoom.min.js')}}"></script>
 <script src="{{ asset('pdf-view/pdfjs/l10n.js')}}"></script>

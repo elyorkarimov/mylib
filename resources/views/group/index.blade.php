@@ -37,6 +37,7 @@
                                         <th>{{ __('Faculty') }}</th>
                                         <th>{{ __('Chair') }}</th>
                                         <th>{{ __('Title') }}</th>
+                                        <th>{{ __('User count') }}</th> 
 
 
                                         <th></th>
@@ -54,6 +55,7 @@
                                             <td>{!! $group->faculty ? $group->faculty->title : '' !!}</td>
                                             <td>{!! $group->chair ? $group->chair->title : '' !!}</td>
                                             <td>{{ $group->title }}</td>
+                                            <td>{{ $group->profiles_count }}</td>
 
                                             <td>
                                                 <form
@@ -70,6 +72,17 @@
                                                     <button type="submit"
                                                         class="btn btn-danger btn-sm">{{ __('Delete') }}</button>
                                                 </form>
+                                                @if (Auth::user()->hasRole('SuperAdmin'))
+                                                <br>
+                                                <form method="POST"
+                                                    action="{{ route('groups.delete', [app()->getLocale(), 'id' => $group->id]) }}">
+                                                    @csrf
+                                                    <input name="type" type="hidden" value="DELETE">
+                                                    <button type="submit"
+                                                        class="btn btn-sm btn-danger btn-flat show_confirm"
+                                                        data-toggle="tooltip">{{ __('Delete from DataBase') }}</button>
+                                                </form>
+                                            @endif
                                             </td>
                                         </tr>
                                     @endforeach

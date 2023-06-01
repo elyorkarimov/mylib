@@ -1,17 +1,17 @@
 @extends('layouts.app')
 
 @section('template_title')
-    {{ __('Books') }}
+    {{ __('Order books') }}
 @endsection
 
 @section('content')
     <div class="content">
         <div class="breadcrumb-wrapper d-flex align-items-center justify-content-between">
             <div>
-                <h1>{{ __('Books') }}</h1>
+                <h1>{{ __('Order books') }}</h1>
                 <p class="breadcrumbs"><span><a
                             href="{{ route('admin.home', app()->getLocale()) }}">{{ __('Home') }}</a></span>
-                    <span><i class="mdi mdi-chevron-right"></i></span>{{ __('Books') }}
+                    <span><i class="mdi mdi-chevron-right"></i></span>{{ __('Order books') }}
                 </p>
             </div>
         </div>

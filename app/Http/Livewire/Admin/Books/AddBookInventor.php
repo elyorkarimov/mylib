@@ -6,23 +6,32 @@ use App\Models\BookInformation;
 use App\Models\BookInventar;
 use Livewire\Component;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
+use Livewire\WithPagination;
 
 class AddBookInventor extends Component
 {
     use LivewireAlert;
+    use WithPagination;
+    protected $paginationTheme = 'bootstrap';
 
     public Collection $inputs;
     public $book_inventars, $isActive = true, $book_inventar_id, $book_information_id, $book_id, $IsActive, $organization_id, $branch_id, $deportmetn_id, $book_information, $book;
+ 
+    public $updateMode = false, $inventar_number, $inventarNumberGenerator, $bar_code, $key, $from, $to, $inventar, $deleteId,  $perPage = 20;
 
-    public $updateMode = false, $inventar_number, $key, $from, $to, $inventar;
-
-    public function mount($infoid)
+    public function mount($infoid, $inventar_id = null)
     {
+        $str_arr = explode("&", $infoid);
+        if (count($str_arr) == 2) {
+            $infoid = $str_arr[0];
+            $this->edit($str_arr[1]);
+        }
+
         $this->book_information_id = $infoid;
         $this->book_information = BookInformation::find($infoid);
-
         $this->book_id = $this->book_information->book->id;
         $this->book = $this->book_information->book;
         $this->organization_id = $this->book_information->organization_id;
@@ -31,16 +40,18 @@ class AddBookInventor extends Component
 
         $this->fill([
             'inputs' => collect([
-                ['inventar_number' => ''],
+                ['inventar_number' => '', 'barcode' => ''],
             ]),
         ]);
     }
     public function render()
     {
-        $this->book_inventars = BookInventar::where('book_id', '=', $this->book_id)->where('book_information_id', '=', $this->book_information_id)->where('branch_id', '=', $this->branch_id)->where('deportmetn_id', '=', $this->deportmetn_id)->orderBy('id', 'desc')->get();
+        $bookinventars = BookInventar::with(['createdBy', 'updatedBy'])->where('book_id', '=', $this->book_id)->where('book_information_id', '=', $this->book_information_id)->where('branch_id', '=', $this->branch_id)->where('deportmetn_id', '=', $this->deportmetn_id)->orderBy('id', 'desc')->paginate($this->perPage);
         $this->book_information = BookInformation::find($this->book_information_id);
-
-        return view('livewire.admin.books.add-book-inventor');
+        $data = [
+            'bookinventars' => $bookinventars,
+        ];
+        return view('livewire.admin.books.add-book-inventor', $data);
     }
 
     public function generate()
@@ -63,9 +74,25 @@ class AddBookInventor extends Component
         if ($this->from < $this->to) {
             DB::beginTransaction();
             try {
+                $count = 1;
                 for ($i = $this->from; $i <= $this->to; $i++) {
-                    $bookInventar = BookInventar::where('inventar_number', '=', trim($this->key) . $i)->first();
-                    if ($bookInventar == null) {
+                    $bookInventar = null;
+                    $key = trim($this->key);
+
+                    $inventarRaqam = null;
+                    $isUk = false;
+
+                    // if ($key === "0" || $key === "1" || $key === "2" || $key === "3" || $key === "4") {
+                    //     $inventarRaqam = $key . $count . $i;
+                    //     $isUk = true;
+                    // } else {
+                    //     $inventarRaqam = $i;
+                    // }
+
+                    if ($key == BookInventar::$TYPE_UK && $this->inventarNumberGenerator != null) {
+
+                        $ukInventarNumbers = preg_replace('/[^0-9]/', '', $this->inventarNumberGenerator);
+                        // $letters = preg_replace('/[^a-zA-Z]/', '', $this->inventarNumberGenerator);
                         $inventarData = [
                             'isActive' => true,
                             'book_id' => $this->book_id,
@@ -73,13 +100,158 @@ class AddBookInventor extends Component
                             'organization_id' => $this->organization_id,
                             'branch_id' => $this->branch_id,
                             'deportmetn_id' => $this->deportmetn_id,
-                            'key' => trim($this->key),
-                            'bar_code' => $i,
-                            'inventar_number' => trim($this->key) . $i,
-                            'inventar' => trim($this->key) . $i,
+                            'key' => $key,
+                            'bar_code' => BookInventar::$TYPE_UK . $i . $ukInventarNumbers,
+                            'inventar_number' => $this->inventarNumberGenerator,
+                            'inventar' => BookInventar::$TYPE_UK . $i . $ukInventarNumbers,
                         ];
+                        $bookInventar = BookInventar::where('bar_code', '=', BookInventar::$TYPE_UK . $i . $ukInventarNumbers)->first();
+                    } elseif ($key == BookInventar::$TYPE_SOVGA) {
+
+                        // $ukInventarNumbers = preg_replace('/[^0-9]/', '', $this->inventarNumberGenerator);
+                        $letters = preg_replace('/[^a-zA-Z]/', '', $this->inventarNumberGenerator);
+                        $inventarData = [
+                            'isActive' => true,
+                            'book_id' => $this->book_id,
+                            'book_information_id' => $this->book_information_id,
+                            'organization_id' => $this->organization_id,
+                            'branch_id' => $this->branch_id,
+                            'deportmetn_id' => $this->deportmetn_id,
+                            'key' => $key,
+                            'bar_code' => BookInventar::$TYPE_SOVGA . $count . $i,
+                            'inventar_number' => $this->inventarNumberGenerator.' '. $i ,
+                            'inventar' => BookInventar::$TYPE_SOVGA . $count . $i,
+                        ];
+                        $bookInventar = BookInventar::where('bar_code', '=', BookInventar::$TYPE_SOVGA . $count . $i)->first();
+                    } elseif ($key == BookInventar::$TYPE_INVENTAR) {
+
+                        // $ukInventarNumbers = preg_replace('/[^0-9]/', '', $this->inventarNumberGenerator);
+                        $letters = preg_replace('/[^a-zA-Z]/', '', $this->inventarNumberGenerator);
+                        $inventarData = [
+                            'isActive' => true,
+                            'book_id' => $this->book_id,
+                            'book_information_id' => $this->book_information_id,
+                            'organization_id' => $this->organization_id,
+                            'branch_id' => $this->branch_id,
+                            'deportmetn_id' => $this->deportmetn_id,
+                            'key' => $key,
+                            'bar_code' => BookInventar::$TYPE_INVENTAR . $count . $i,
+                            'inventar_number' => $i . $letters,
+                            'inventar' => BookInventar::$TYPE_INVENTAR . $count . $i,
+                        ];
+                        $bookInventar = BookInventar::where('bar_code', '=', BookInventar::$TYPE_INVENTAR . $count . $i)->first();
+                    } elseif ($key == BookInventar::$TYPE_DROP) {
+                        $invents = explode("/", $this->inventarNumberGenerator);
+                        $invent = $invents[0];
+                        // $ukInventarNumbers = preg_replace('/[^0-9]/', '', $this->inventarNumberGenerator);
+                        // $letters = preg_replace('/[^a-zA-Z]/', '', $this->inventarNumberGenerator);
+                        $inventarData = [
+                            'isActive' => true,
+                            'book_id' => $this->book_id,
+                            'book_information_id' => $this->book_information_id,
+                            'organization_id' => $this->organization_id,
+                            'branch_id' => $this->branch_id,
+                            'deportmetn_id' => $this->deportmetn_id,
+                            'key' => $key,
+                            'bar_code' => BookInventar::$TYPE_DROP . $i . $invent,
+                            'inventar_number' => $invent . '/' . $i,
+                            'inventar' => BookInventar::$TYPE_DROP . $i . $invent,
+                        ];
+                        $bookInventar = BookInventar::where('bar_code', '=', BookInventar::$TYPE_DROP . $i . $invent)->first();
+                    } elseif ($key == BookInventar::$TYPE_NUMLESS) {
+                        $inventarData = [
+                            'isActive' => true,
+                            'book_id' => $this->book_id,
+                            'book_information_id' => $this->book_information_id,
+                            'organization_id' => $this->organization_id,
+                            'branch_id' => $this->branch_id,
+                            'deportmetn_id' => $this->deportmetn_id,
+                            'key' => BookInventar::$TYPE_NUMLESS,
+                            'bar_code' => BookInventar::$TYPE_NUMLESS . $count . $i,
+                            'inventar_number' => $i,
+                            'inventar' => BookInventar::$TYPE_NUMLESS . $count . $i,
+                        ];
+                        $bookInventar = BookInventar::where('bar_code', '=', BookInventar::$TYPE_NUMLESS . $count . $i)->first();
+                    } elseif ($key == BookInventar::$TYPE_NUMLESS_SECOND) {
+                        $inventarData = [
+                            'isActive' => true,
+                            'book_id' => $this->book_id,
+                            'book_information_id' => $this->book_information_id,
+                            'organization_id' => $this->organization_id,
+                            'branch_id' => $this->branch_id,
+                            'deportmetn_id' => $this->deportmetn_id,
+                            'key' => BookInventar::$TYPE_NUMLESS_SECOND,
+                            'bar_code' => BookInventar::$TYPE_NUMLESS_SECOND .  $i,
+                            'inventar_number' => $this->inventarNumberGenerator,
+                            'inventar' => BookInventar::$TYPE_NUMLESS_SECOND .  $i,
+                        ];
+                        $bookInventar = BookInventar::where('bar_code', '=', BookInventar::$TYPE_NUMLESS_SECOND . $i)->first();
+                    } else {
+                        $inventarData = [
+                            'isActive' => true,
+                            'book_id' => $this->book_id,
+                            'book_information_id' => $this->book_information_id,
+                            'organization_id' => $this->organization_id,
+                            'branch_id' => $this->branch_id,
+                            'deportmetn_id' => $this->deportmetn_id,
+                            'key' => $key,
+                            'bar_code' => $i,
+                            'inventar_number' => $i,
+                            'inventar' => $key . $i,
+                        ];
+                        $bookInventar = BookInventar::where('bar_code', '=', $i)->first();
+                    }
+                    // if($this->inventarNumberGenerator){
+                    //     if($isUk){
+                    //         $inventarData = [
+                    //             'isActive' => true,
+                    //             'book_id' => $this->book_id,
+                    //             'book_information_id' => $this->book_information_id,
+                    //             'organization_id' => $this->organization_id,
+                    //             'branch_id' => $this->branch_id,
+                    //             'deportmetn_id' => $this->deportmetn_id,
+                    //             'key' => $key,
+                    //             'bar_code' => $inventarRaqam,
+                    //             'inventar_number' => $this->inventarNumberGenerator,
+                    //             'inventar' => $key . $i,
+                    //         ];
+
+                    //     }else{
+                    //         $inventarData = [
+                    //             'isActive' => true,
+                    //             'book_id' => $this->book_id,
+                    //             'book_information_id' => $this->book_information_id,
+                    //             'organization_id' => $this->organization_id,
+                    //             'branch_id' => $this->branch_id,
+                    //             'deportmetn_id' => $this->deportmetn_id,
+                    //             'key' => $key,
+                    //             'bar_code' => $i,
+                    //             'inventar_number' => $this->inventarNumberGenerator,
+                    //             'inventar' => $key . $i,
+                    //         ];
+
+                    //     }
+
+                    // }else{
+                    //     $inventarData = [
+                    //         'isActive' => true,
+                    //         'book_id' => $this->book_id,
+                    //         'book_information_id' => $this->book_information_id,
+                    //         'organization_id' => $this->organization_id,
+                    //         'branch_id' => $this->branch_id,
+                    //         'deportmetn_id' => $this->deportmetn_id,
+                    //         'key' => $key,
+                    //         'bar_code' => $inventarRaqam,
+                    //         'inventar_number' => $inventarRaqam,
+                    //         'inventar' => $key . $i,
+                    //     ];
+
+                    // }
+                    if ($bookInventar == null) {
                         $bookInventar = BookInventar::create($inventarData);
                     }
+                    // $key = "";
+                    $count++;
                 }
                 DB::commit();
                 $this->alert('success',  __('Successfully saved'));
@@ -90,7 +262,7 @@ class AddBookInventor extends Component
             } catch (\Throwable $e) {
                 DB::rollback();
                 throw $e;
-            } 
+            }
         } else {
             $this->alert('error',  __('from must be less than to'));
         }
@@ -104,33 +276,39 @@ class AddBookInventor extends Component
                 'book_information_id' => 'required',
                 'branch_id' => 'required',
                 'deportmetn_id' => 'required',
-                'inputs.*.inventar_number' => 'required|unique:book_inventars',
+                'inputs.*.bar_code' => 'required|numeric|unique:book_inventars',
             ],
             [
-                'inputs.*.inventar_number.required' =>  __('The :attribute field is required.'),
-                'inputs.*.inventar_number.unique' =>  __('The :attribute has already been taken.'),
+                'inputs.*.bar_code.required' =>  __('The :attribute field is required.'),
+                'inputs.*.bar_code.numeric' =>  __('The :attribute must be integer.'),
+                'inputs.*.bar_code.unique' =>  __('The :attribute has already been taken.'),
             ],
             [
-                'inputs.*.inventar_number' => __('Inventar Number'),
+                'inputs.*.bar_code' => __('Bar code'),
             ]
         );
-
         if ($this->inputs->count() > 0) {
             DB::beginTransaction();
             try {
+
                 foreach ($this->inputs as $key => $value) {
-                    $invent= trim($value['inventar_number']);
-                    $inventarIsExists =  BookInventar::where('inventar_number', '=', $invent)->first();
+                    $invent = trim($value['bar_code']);
+                    $inventar_number = trim($value['inventar_number']);
+                    $inventarIsExists =  BookInventar::where('bar_code', '=', $invent)->first();
 
 
                     $pattern = "/(\d+)/";
-                    $array = preg_split($pattern, $invent, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
-                    $key=null;
-                    $barcode=$invent;
-                    if(count($array)>1){
-                        $key=$array[0];
-                        $barcode=$array[1];    
+                    $array = preg_split($pattern, $inventar_number, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+                    $key = null;
+                    $barcode = $invent;
+                    if (count($array) > 1) {
+                        $key = $array[0];
+                        $barcode = $array[1];
                     }
+                    if ($inventar_number == "") {
+                        $inventar_number = $invent;
+                    }
+
                     $inventarData = [
                         'isActive' => true,
                         'book_id' => $this->book_id,
@@ -138,14 +316,14 @@ class AddBookInventor extends Component
                         'organization_id' => $this->organization_id,
                         'branch_id' => $this->branch_id,
                         'deportmetn_id' => $this->deportmetn_id,
-                        'inventar_number' => $invent,
+                        'inventar_number' => trim($inventar_number),
                         'inventar' => $invent,
                         'key' => $key,
-                        'bar_code' => $barcode,
+                        'bar_code' => $invent,
                     ];
-                    if($inventarIsExists==null){
+                    if ($inventarIsExists == null) {
                         $bookInventar = BookInventar::create($inventarData);
-                    }else{
+                    } else {
                         $this->alert('error',  __("The inventar number has already been taken."));
                         $this->resetInputFields();
                         return false;
@@ -178,12 +356,14 @@ class AddBookInventor extends Component
     private function resetInputFields()
     {
         $this->inventar_number = '';
+        $this->bar_code = null;
+        $this->inventarNumberGenerator = null;
         $this->key = null;
         $this->from = null;
         $this->to = null;
         $this->fill([
             'inputs' => collect([
-                ['inventar_number' => ''],
+                ['inventar_number' => '', 'bar_code' => ''],
             ]),
         ]);
     }
@@ -202,6 +382,7 @@ class AddBookInventor extends Component
         $book_inventar = BookInventar::findOrFail($id);
         $this->book_inventar_id = $book_inventar->id;
         $this->inventar_number = $book_inventar->inventar_number;
+        $this->bar_code = $book_inventar->bar_code;
         $this->isActive = $book_inventar->isActive;
         // $this->book_information_id = $id;
 
@@ -215,55 +396,61 @@ class AddBookInventor extends Component
         // $this->book_id  = $book_info->book_id ;
         $this->updateMode = true;
         // return true;
+
     }
     public function update()
     {
+
         $this->validate(
             [
-                'inventar_number' => 'required|unique:book_inventars,inventar_number,' . $this->book_inventar_id,
+                'bar_code' => 'required|numeric|min:0|not_in:0|unique:book_inventars,bar_code,' . $this->book_inventar_id,
             ],
             [
-                'inventar_number.required' =>  __('The :attribute field is required.'),
-                'inventar_number.unique' =>  __('The :attribute has already been taken.'),
+                'bar_code.required' =>  __('The :attribute field is required.'),
+                'bar_code.integer' =>  __('The :attribute must be integer.'),
+                'bar_code.unique' =>  __('The :attribute has already been taken.'),
             ],
             [
-                'inventar_number' => __('Inventar Number'),
+                'bar_code' => __('Bar code'),
             ]
         );
+
         if ($this->book_inventar_id) {
             $record = BookInventar::find($this->book_inventar_id);
+
             // $input = [
             //     'organization_id' => $this->organization_id,
             //     'isActive' => $this->isActive,
             //     'inventar_number' => trim($this->inventar_number),
             // ];
-            $invent= trim($this->inventar_number);
+            $invent = trim($this->inventar_number);
             $pattern = "/(\d+)/";
             $array = preg_split($pattern, $invent, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
-            $key=null;
-            $barcode=$invent;    
+            $key = null;
+            $barcode = $invent;
 
-            if(count($array)>1){
-                $key=$array[0];
-                $barcode=$array[1];    
+            if (count($array) > 1) {
+                $key = $array[0];
+                $barcode = $array[1];
             }
             $inventarData = [
                 'isActive' => $this->isActive,
                 'organization_id' => $this->organization_id,
                 'branch_id' => $this->branch_id,
                 'deportmetn_id' => $this->deportmetn_id,
-                'inventar_number' => $invent,
+                'inventar_number' => $this->inventar_number,
                 'inventar' => $invent,
                 'key' => $key,
-                'bar_code' => $barcode,
+                'bar_code' => $this->bar_code,
             ];
-             
+
             $record->update($inventarData);
             // $this->resetInput();
             $this->updateMode = false;
             $this->resetInputFields();
             $this->alert('success',  __('Successfully saved'));
-            return redirect()->to(app()->getLocale() . '/admin/books/' . $this->book_id . '/' . $this->book_information_id);
+            return back();
+            // return redirect()->to(app()->getLocale() . '/admin/books/' . $this->book_id . '/' . $this->book_information_id);
 
             // return true;
             // return redirect()->to(app()->getLocale() . '/admin/books/' . $this->book_id);
@@ -288,10 +475,32 @@ class AddBookInventor extends Component
         $book_inventar->isActive = false;
         $book_inventar->save();
     }
+
     public function editInventar($inventar_id)
     {
         $book_inventar = BookInventar::find($inventar_id);
         $book_inventar->isActive = true;
         $book_inventar->save();
+    }
+
+    public function deleteInventar($inventar_id)
+    {
+        $this->deleteId = $inventar_id;
+
+        // $book_inventar = BookInventar::find($inventar_id);
+        // $book_inventar->isActive = false;
+        // $book_inventar->save();
+    }
+    /**
+     * Write code on Method
+     *
+     * @return response()
+     */
+    public function delete()
+    {
+        if (Auth::user()->hasRole('SuperAdmin')) {
+            BookInventar::find($this->deleteId)->delete();
+            $this->alert('success',  __('Successfully deleted'));
+        }
     }
 }

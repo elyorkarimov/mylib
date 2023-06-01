@@ -7,137 +7,82 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <style>
-        #invoice-POS {
-            /* position: absolute;   */
-            /* left: 50%;
-            top: 100%;
-            -webkit-transform: translate(-50%, -50%);
-            transform: translate(-50%, -50%); */
-            /* padding-top: 90%; */
-            width: 5cm;
-            height: 3cm;
-            background: #FFF;
+        @moduleWidth: 2px;
+        @barColor: #404040;
+        @bgColor: #f0f0f0;
+        @digitHeight: 18px;
+        @digitFontSize: 14px;
+        @digitColor: #802020;
 
-            ::selection {
-                background: #f31544;
-                color: #FFF;
-            }
-
-            ::moz-selection {
-                background: #f31544;
-                color: #FFF;
-            }
-
-            #top,
-            #mid,
-            #bot {
-                /* Targets all id with 'col-' */
-                border-bottom: 1px solid #EEE;
-            }
-
-            #top {
-                min-height: 100px;
-            }
-
-            #mid {
-                min-height: 80px;
-            }
-
-
-            .info {
-                display: block;
-                //float:left;
-                margin-left: 0;
-            }
-
-            .title {
-                float: right;
-            }
-
-            .title p {
-                text-align: right;
-            }
-
-            table {
-                width: 100%;
-                border-collapse: collapse;
-            }
-
-            td {
-                //padding: 5px 0 5px 15px;
-                //border: 1px solid #EEE
-            }
-
-            .tabletitle {
-                //padding: 5px;
-                font-size: .5em;
-                background: #EEE;
-            }
-
-            .service {
-                border-bottom: 1px solid #EEE;
-            }
-
-            .item {
-                width: 24mm;
-            }
-
-            .itemtext {
-                font-size: .5em;
-            }
-
-            #legalcopy {
-                margin-top: 5mm;
-            }
-
+        html {
+            height: 100%;
         }
 
-        #legalcopy{
-            text-align: center;
-        }
-        .legal {
-            text-align: center;
-        }
-
-        #p_title {
-            font-size: 14px;
+        body {
+            height: 100%;
+            padding: 0;
+            background: #e0e0e0;
         }
 
-        #bot {
-            position: absolute;
 
-            bottom: 0;
-
-            left: 0;
-
+        .toPrint,
+        .barcode {
+            list-style: none;
+            margin: 0;
+            padding: 0;
         }
 
+        .toPrint {
+            position: relative;
+            top: 35%;
+            display: table;
+            margin: -50px auto;
+            padding: 10px;
+            background: @bgColor;
+            /* box-shadow: 0px 1px 10px -5px #000; */
+            /* border-radius: 3px; */
+        }
+
+        .barcode {
+            display: table-cell;
+            position: relative;
+            width: 7 * @moduleWidth;
+            overflow: hidden;
+        }
     </style>
-    <style type="text/css" media="print">
-        @page { size: portable; }
-      </style>
+    <style type="text/css">
+        @page {
+            size: 2.16535in 1.1811in landscape;
+            margin: 0;
+        }
+
+        .qr_code {
+            text-align: center;
+        }
+    </style>
 </head>
 
-<body>
-    <div id="invoice-POS">
-        <div id="bot">
-            <div id="legalcopy"> 
-                
-            <span class="legal">
+<body translate="no">
+
+    <div class="toPrint d-flex align-content-start flex-wrap">
+        <div class="barcode text-center">
+            @if (env('APP_NAME') == 'AKBT_TSUL')
+                <div class="qr_code">
+                    {!! QrCode::size(95)->generate($bookInventar->bar_code) !!}
+                    <center>{{ $bookInventar->bar_code }}</center>
+                </div>
+            @else
                 @php
                     $generator = new Picqer\Barcode\BarcodeGeneratorPNG();
-                    echo '<img src="data:image/png;base64,' . base64_encode($generator->getBarcode($bookInventar->inventar_number, $generator::TYPE_CODE_128)) . '">';
+                    echo '<img src="data:image/png;base64,' . base64_encode($generator->getBarcode($bookInventar->bar_code, $generator::TYPE_CODE_128)) . '">';
                 @endphp
-                <center>{{ $bookInventar->inventar_number }}</center>
-            </span>
-            </div>
+                <center>{{ $bookInventar->bar_code }}</center>
+            @endif
         </div>
-        <!--End InvoiceBot-->
     </div>
-    <!--End Invoice-->
     <script>
-       window.onload = function() {
-             window.print();
+        window.onload = function() {
+            window.print();
             setTimeout(function() {
                 window.close();
             }, 1);

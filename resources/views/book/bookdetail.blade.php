@@ -9,13 +9,18 @@
             {{ $book->dc_title }}
         </div>
         <div class="form-group">
+            <strong>{{ __('Location index') }}:</strong>
+            {{ $book->location_index }}
+        </div>
+        <div class="form-group">
             <strong>{{ __("Author's mark") }}:</strong>
             {{ $book->authors_mark }}
         </div>
         <div class="form-group">
             <strong>{{ __('Dc Subjects') }}:</strong>
             @php
-                if($book->dc_subjects!=null){
+
+                if($book->dc_subjects!=null && $book->dc_subjects!="null"){
                     foreach (json_decode($book->dc_subjects) as $key => $value) {
                         echo ($key+1).') '.$value.', ';
                     }
@@ -37,6 +42,11 @@
             {{ $book->dc_UDK }}
         </div>
        
+        <div class="form-group">
+            <strong>{{ __('Dc BBK') }}:</strong>
+            {{ $book->dc_BBK }}
+        </div>
+        
        
         <div class="form-group">
             <strong>{{ __('Dc Publisher') }}:</strong>
@@ -151,6 +161,16 @@
             <strong>{{__('Where')}}:</strong>
             {!! $book->where_id ? $book->wheres->title : '' !!}
         </div>
+        
+        <div class="form-group">
+            <strong>{{__('Circulation')}}:</strong>
+            {{ $book->circulation }}
+        </div>
+        <div class="form-group">
+            <strong>{{__('Printing plate')}}:</strong>
+            {{ $book->printing_plate }}
+        </div>
+
         <div class="form-group">
             <strong>{{ __('Created By') }}:</strong>
             {!! $book->created_by ? $book->createdBy->name : '' !!}

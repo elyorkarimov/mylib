@@ -36,6 +36,7 @@
 
                                     <th>{{ __('Title') }}</th>
                                     <th>{{ __('IsActive') }}</th> 
+                                    <th>{{ __('User count') }}</th> 
 
 
                                     <th></th>
@@ -47,10 +48,12 @@
                                         <td>{{ ++$i }}</td>
                                         <td>{!! $faculty->organization_id ? $faculty->organization->title : '' !!}</td>
                                         <td>{!! $faculty->branch_id ? $faculty->branch->title:''!!}</td>
-
-                                        <td>{{ $faculty->title }}</td>
+ 
+                                        <td>
+                                            {{ $faculty->title }}
+                                        </td>
                                         <td>{!! $faculty->isActive == 1 ? '<span class="badge badge-success"><i class="mdi mdi-check-circle"></i></span>' : '<span class="badge badge-danger"><i class="mdi mdi-close-circle "></i></span>' !!}</td>
-
+                                        <td>{{ $faculty->profiles_count }}</td>
  
                                         <td>
                                             <form action="{{ route('faculties.destroy',[app()->getLocale(), $faculty->id]) }}" method="POST">
@@ -60,6 +63,17 @@
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-danger btn-sm">{{ __('Delete') }}</button>
                                             </form>
+                                            @if (Auth::user()->hasRole('SuperAdmin'))
+                                                <br>
+                                                <form method="POST"
+                                                    action="{{ route('faculties.delete', [app()->getLocale(), 'id' => $faculty->id]) }}">
+                                                    @csrf
+                                                    <input name="type" type="hidden" value="DELETE">
+                                                    <button type="submit"
+                                                        class="btn btn-sm btn-danger btn-flat show_confirm"
+                                                        data-toggle="tooltip">{{ __('Delete from DataBase') }}</button>
+                                                </form>
+                                            @endif
                                         </td>
                                     </tr>
                                 @endforeach                                    

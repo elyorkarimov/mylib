@@ -28,23 +28,58 @@ class Create extends Component
 
     public $branches, $book, $bookSubjects, $bookFileTypes, $bookAccessTypes, $bookTextTypes, $bookTexts, $bookLanguages, $bookTypes, $bookAuthors, $new_subjects, $wheres, $whos;
     public $departments;
-    public $book_face_image, $book_full_text;
-    public $dc_title, $authors_mark, $dc_published_city, $dc_publisher, $dc_UDK, $ISBN, $dc_description, $dc_source, $dc_date, $betlar_soni = 0, $price = 0, $status = '1', $books_type, $book_language, $book_text, $book_text_type, $book_access_type, $book_file_type;
+    public $book_face_image, $book_full_text, $import_book_full_text, $file_format=null, $file_format_type=null, $file_size=null;
+    public $dc_title, $authors_mark, $dc_published_city, $dc_publisher, $dc_UDK, $ISBN, $uk, $dc_description, $dc_source, $dc_date, $betlar_soni = 0, $price = 0, $status = '1', $books_type, $book_language, $book_text, $book_text_type, $book_access_type, $book_file_type;
     public $selectedBranches = NULL, $new_subject, $where_id, $who_id;
     public $dc_authors = [], $subjects = [], $import_book_id=0;
     // public $organization_id,$branch_id, $department_id;
     
+    public function change_str_with_alphabet($str){
+        $returnStr =str_replace('&#1202;', 'Ҳ', $str);
+        $returnStr=str_replace('&#1203;', 'ҳ', $returnStr);
+        $returnStr=str_replace('&#1178;', 'Қ', $returnStr);
+        $returnStr=str_replace('&#1179;', 'қ', $returnStr);
+        $returnStr=str_replace('&#1170;', 'Ғ', $returnStr);
+        $returnStr=str_replace('&#1171;', 'ғ', $returnStr);
+        $returnStr=str_replace('&#1171;', 'ғ', $returnStr);
+        $returnStr=str_replace("\'", "'", $returnStr);
+        return $returnStr;
+    }
     public function mount($import_book)
     {
-        if(!is_null($import_book)){
+        if(!is_null($import_book)){ 
             $this->import_book_id=$import_book->id;
-            $this->dc_title=$import_book->title;
-            $author=[$import_book->authors];
-            $this->dc_authors=$author;
-            $this->dc_publisher=$import_book->publisher;
-            $this->dc_published_city=$import_book->published_city;
+            $this->dc_title=$this->change_str_with_alphabet($import_book->title);
+            $all_authors = \App\Models\Author::GetIdByJsonName($import_book->authors);
+             // $author = Author::whereTranslation("title", $import_book->authors)->first();
+            // if ($author == null) {
+            //     $authorData = null;
+            //     $count = 0;
+            //     foreach (config('app.locales') as $til_code => $locale) {
+            //         $authorData[$til_code] = [
+            //             'title' => $import_book->authors
+            //         ];
+            //         $count += 1;
+            //     }
+            //     Author::create($authorData);
+            // }
+            // $author=[$import_book->authors];
+            $this->dc_authors=json_decode($import_book->authors);
+            $this->dc_publisher=$this->change_str_with_alphabet($import_book->publisher);
+            $this->dc_published_city=$this->change_str_with_alphabet($import_book->published_city);
             $this->dc_date=$import_book->published_year;
             $this->price=$import_book->price;
+            $this->dc_description=$this->change_str_with_alphabet($import_book->description);
+            $this->authors_mark=$this->change_str_with_alphabet($import_book->authors_mark);
+            $this->dc_UDK=$import_book->UDK;
+            $this->ISBN=$import_book->ISBN;
+            $this->uk=$import_book->uk;
+            $this->betlar_soni=$this->change_str_with_alphabet($import_book->betlar_soni);
+            $this->import_book_full_text=$this->change_str_with_alphabet($import_book->full_text_path);
+            $this->file_format=$import_book->file_format;
+            $this->file_format_type=$import_book->file_format_type;
+            $this->file_size=$import_book->file_size;
+            // dd($this->dc_authors);
         }
         // $roles = Auth::user()->getRoleNames()->toArray();
         // if(count($roles)>0){
@@ -55,6 +90,14 @@ class Create extends Component
             
         // }
     }
+    public array $locationUsers = [];
+    protected $listeners = ['locationUsersSelected'];
+    
+    public function locationUsersSelected($locationUsersValues)
+    {
+        // dd($locationUsersValues);
+      $this->locationUsers = $locationUsersValues;
+    }
 
     public function render()
     { 
@@ -62,6 +105,7 @@ class Create extends Component
         $this->bookSubjects = BookSubject::active()->translatedIn(app()->getLocale())->listsTranslations('title')->pluck('title', 'id');
 
         $this->bookAuthors = Author::active()->translatedIn(app()->getLocale())->listsTranslations('title')->pluck('title', 'id');
+        // dd($this->bookAuthors);
         $this->bookTypes = BooksType::active()->translatedIn(app()->getLocale())->listsTranslations('title')->pluck('title', 'id');
         $this->bookLanguages = BookLanguage::active()->translatedIn(app()->getLocale())->listsTranslations('title')->pluck('title', 'id');
         $this->bookTexts = BookText::active()->translatedIn(app()->getLocale())->listsTranslations('title')->pluck('title', 'id');
@@ -101,7 +145,7 @@ class Create extends Component
                 'books_type' => __('Books Type'),
             ]
         );
-
+        // dd($this->dc_authors);
         // $this->book_face_image->storeAs('book_face_image');
         // $imagename = time().md5(uniqid(rand(), true)).'.'.$this->book_face_image->extension();
         $image_path = null;
@@ -125,7 +169,7 @@ class Create extends Component
                 }
             }
         }
-        if (count($this->dc_authors) > 0) {
+        if ($this->dc_authors != null && count($this->dc_authors) > 0) {
             foreach ($this->dc_authors as $k => $v) {
                 $author = Author::whereTranslation("title", $v)->first();
                 if ($author == null) {
@@ -163,17 +207,19 @@ class Create extends Component
             }
             $old_subject=null;     
         }
-
-
+ 
         $full_text_path = null;
-        $file_format = null;
-        $file_format_type = null;
-        $file_size = null;
+        $file_format = $this->file_format;
+        $file_format_type = $this->file_format_type;
+        $file_size = $this->file_size;
         if ($this->book_full_text != null) {
             $full_text_path = $this->book_full_text->store('books/fulltext', 'public');
             $file_format = $this->book_full_text->getClientOriginalExtension();
             $file_format_type = $this->book_full_text->getMimeType();
             $file_size = $this->book_full_text->getSize();
+        }
+        if($this->import_book_full_text!=null){
+            $full_text_path=$this->import_book_full_text;
         }
         $old_book = Book::where('dc_title', '=', trim($this->dc_title))->where('published_year', '=', trim($this->dc_date))->where('dc_authors', '=', json_encode($this->dc_authors))->first();
         if($old_book!=null){
@@ -192,6 +238,7 @@ class Create extends Component
                 'dc_publisher' => trim($this->dc_publisher),
                 'dc_published_city' => trim($this->dc_published_city),
                 'ISBN' => trim($this->ISBN),
+                'uk' => trim($this->uk),
                 'dc_description' => trim($this->dc_description),
                 'dc_date' => trim($this->dc_date),
                 'betlar_soni' => trim($this->betlar_soni),
@@ -212,9 +259,8 @@ class Create extends Component
                 'file_format' => $file_format,
                 'file_format_type' => $file_format_type,
                 'file_size' => $file_size,
-            ];
-            
-            DB::beginTransaction();
+            ]; 
+             DB::beginTransaction();
     
             try {
                 $book = Book::create($input);
@@ -223,13 +269,16 @@ class Create extends Component
                 DB::commit();
                 $this->resetInputFields();
                 $import = Import::find($this->import_book_id);
-                $import->status=2;
-                $import->save();
+                if($import!=null){
+                    $import->status=2;
+                    $import->save();    
+                }
                 $this->alert('success',  __('Successfully saved'));
                 // return redirect()->route('dashboard');
                 return redirect()->to(app()->getLocale() . '/admin/books/' . $book->id);
             } catch (\Exception $e) {
                 DB::rollback();
+                dd($e);
                 // Send error back to user
             }
         }
@@ -247,6 +296,7 @@ class Create extends Component
         $this->dc_publisher = null;
         $this->dc_published_city = null;
         $this->ISBN = null;
+        $this->uk = null;
         $this->dc_description = null;
         $this->dc_date = null;
         $this->betlar_soni = 0;

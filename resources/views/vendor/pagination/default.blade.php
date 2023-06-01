@@ -3,9 +3,9 @@
     <div class="row justify-content-between bottom-information">
         <div class="dataTables_info" id="responsive-data-table_info" role="status" aria-live="polite">
             @if (App::currentLocale() == 'uz')
-                {{ $paginator->total() }} ta yozuvdan {{ $paginator->perPage() }} tadan
-                {{ $paginator->currentPage() }}
-                tasi koʻrsatilmoqda
+               <b>Jami:</b> {{ $paginator->total() }} ta yozuv, {{ $paginator->currentPage() }}-sahifada
+                {{ $paginator->perPage() }}
+                ta yozuv koʻrsatilmoqda
             @else
                 Showing {{ $paginator->perPage() }} to {{ $paginator->currentPage() }} of
                 {{ $paginator->total() }}

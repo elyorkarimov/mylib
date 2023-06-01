@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Astrotomic\Translatable\Translatable;
 use Astrotomic\Translatable\Contracts\Translatable as TranslatableContract;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -30,11 +31,11 @@ use Illuminate\Support\Facades\DB;
  */
 class BooksType extends Model implements TranslatableContract
 {
-    
+
     use Translatable; // 2. To add translation methods
     public $translatedAttributes = ['title', 'locale', 'slug'];
-    
-     
+
+
     protected $perPage = 20;
 
     /**
@@ -42,7 +43,7 @@ class BooksType extends Model implements TranslatableContract
      *
      * @var array
      */
-    protected $fillable = ['code','isActive','image_path','icon_path','created_by','updated_by'];
+    protected $fillable = ['code', 'isActive', 'image_path', 'icon_path', 'created_by', 'updated_by'];
 
 
     /**
@@ -53,12 +54,22 @@ class BooksType extends Model implements TranslatableContract
         return $this->hasMany('App\Models\BooksTypeTranslation', 'books_type_id', 'id');
     }
 
-     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
-     */
-    public function book()
+    public static function getMonths()
     {
-        return $this->hasOne('App\Models\Book', 'books_type_id', 'id');
+        return [
+            '01' => __("January"),
+            '02' => __('February'),
+            '03' => __('March'),
+            '04' => __('April'),
+            '05' => __('May'),
+            '06' => __('June'),
+            '07' => __('July'),
+            '08' => __('August'),
+            '09' => __('September'),
+            '10' => __('October'),
+            '11' => __('November'),
+            '12' => __('December')
+        ];
     }
     /**
      * @return \Illuminate\Database\Eloquent\Relations\hasMany
@@ -68,34 +79,75 @@ class BooksType extends Model implements TranslatableContract
         return $this->hasMany('App\Models\Book', 'books_type_id', 'id');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\hasMany
+     */
+    public function journals()
+    {
+        return $this->hasMany('App\Models\Journal', 'books_type_id', 'id');
+    }
+
     public static function GetCountBookCountByBookTypeId($id = null)
     {
-      $cards = DB::select("SELECT COUNT(*) as nusxa FROM `books_types` as bt left JOIN books as b on b.books_type_id =bt.id where b.status=1 and bt.id=$id GROUP by bt.id;");
-      
-      if(count($cards)>0){
-        return $cards[0]->nusxa;
-      }
-      return 0;
+        $cards = DB::select("SELECT COUNT(*) as nusxa FROM `books_types` as bt left JOIN books as b on b.books_type_id =bt.id where b.status=1 and bt.id=$id GROUP by bt.id;");
+
+        if (count($cards) > 0) {
+            return $cards[0]->nusxa;
+        }
+        return 0;
     }
 
     public static function GetCountBookCopiesByBookTypeId($id = null)
     {
-      $cards = DB::select("SELECT COUNT(*) as nusxa FROM `books_types` as bt left JOIN books as b on b.books_type_id =bt.id left join book_inventars as bil on bil.book_id=b.id where b.status=1 and bil.isActive=1 and bt.id=$id GROUP by bt.id;");
-      
-      if(count($cards)>0){
-        return $cards[0]->nusxa;
-      }
-      return 0;
+        $cards = DB::select("SELECT COUNT(*) as nusxa FROM `books_types` as bt left JOIN books as b on b.books_type_id =bt.id left join book_inventars as bil on bil.book_id=b.id where b.status=1 and bil.isActive=1 and bt.id=$id GROUP by bt.id;");
+
+        if (count($cards) > 0) {
+            return $cards[0]->nusxa;
+        }
+        return 0;
     }
 
     public static function GetCountBookByBookTypeId($id = null)
     {
-      $cards = DB::select("SELECT SUM(COUNT(DISTINCT bil.book_id)) OVER() as nomda FROM `books_types` as bt left JOIN books as b on b.books_type_id =bt.id left join book_inventars as bil on bil.book_id=b.id where b.status=1 and bil.isActive=1 and bt.id=$id GROUP by bil.book_id limit 1;");
-      
-      if(count($cards)>0){
-        return $cards[0]->nomda;
-      }
-      return 0;
+        $cards = DB::select("SELECT SUM(COUNT(DISTINCT bil.book_id)) OVER() as nomda FROM `books_types` as bt left JOIN books as b on b.books_type_id =bt.id left join book_inventars as bil on bil.book_id=b.id where b.status=1 and bil.isActive=1 and bt.id=$id GROUP by bil.book_id limit 1;");
+
+        if (count($cards) > 0) {
+            return $cards[0]->nomda;
+        }
+        return 0;
+    }
+
+
+    public static function GetCountBookByBookTypeByMonthAndId($id = null, $year, $month)
+    {
+        $from = $year . '-' . $month;
+        $to = $year . '-' . $month;
+
+        $startDate = Carbon::createFromFormat('Y-m', $from)->startOfMonth();
+        $endDate = Carbon::createFromFormat('Y-m', $to)->endOfMonth();
+
+        $cards = DB::select("SELECT SUM(COUNT(DISTINCT bil.book_id)) OVER() as nomda FROM `books_types` as bt left JOIN books as b on b.books_type_id =bt.id left join book_inventars as bil on bil.book_id=b.id where b.status=1 and bil.isActive=1 and bt.id=$id and DATE(bil.created_at) between '$startDate' and '$endDate' GROUP by bil.book_id  limit 1;");
+
+        if (count($cards) > 0) {
+            return $cards[0]->nomda;
+        }
+        return 0;
+    }
+
+    public static function GetCountBookCopiesByBookTypeByMonthAndId($id = null, $year, $month)
+    {
+        $from = $year . '-' . $month;
+        $to = $year . '-' . $month;
+
+        $startDate = Carbon::createFromFormat('Y-m', $from)->startOfMonth();
+        $endDate = Carbon::createFromFormat('Y-m', $to)->endOfMonth();
+
+        $cards = DB::select("SELECT COUNT(*) as nusxa FROM `books_types` as bt left JOIN books as b on b.books_type_id =bt.id left join book_inventars as bil on bil.book_id=b.id where b.status=1 and bil.isActive=1 and bt.id=$id and DATE(bil.created_at) between '$startDate' and '$endDate' GROUP by bt.id;");
+
+        if (count($cards) > 0) {
+            return $cards[0]->nusxa;
+        }
+        return 0;
     }
 
     /**
@@ -138,7 +190,6 @@ class BooksType extends Model implements TranslatableContract
     public static function GetData(Request $request, BooksType $booksType)
     {
 
-        
         $data = [];
         foreach (config('app.locales') as $k => $locale) {
             $type = new self();
@@ -151,16 +202,17 @@ class BooksType extends Model implements TranslatableContract
             $booksType_coverage_image_name = Auth::id() . '_' . uniqid() . '_' . time() . '.' . $request->file('file')->getClientOriginalExtension();
             $filePath = $request->file('file')->storeAs('booksTypes/photo', $booksType_coverage_image_name, 'public');
             $data['image_path'] = $booksType_coverage_image_name;
-            if($booksType!=null && $booksType->image_path){
-                $path = public_path('storage/booksTypes/photo/'.$booksType->image_path);
+            if ($booksType != null && $booksType->image_path) {
+                $path = public_path('storage/booksTypes/photo/' . $booksType->image_path);
                 $isExists = file_exists($path);
-                if($isExists && is_file($path)){
+                if ($isExists && is_file($path)) {
                     unlink($path);
                 }
             }
         }
         $data['isActive'] = $request->input('isActive');
         $data['icon_path'] = $request->input('icon_path');
+
         return $data;
     }
     public static function rules()
@@ -170,6 +222,4 @@ class BooksType extends Model implements TranslatableContract
         }
         return $rules;
     }
-    
-
 }

@@ -37,7 +37,7 @@
                                                     {{ $k }}:</label>
                                                 @php
                                                     $title = null;
-                                                     if (count($journal->journalTranslations) > 0 && $journal->journalTranslations[$step]->locale == $k) {
+                                                     if (count($journal->journalTranslations) > 0 && isset($journal->journalTranslations[$step]) && $journal->journalTranslations[$step]->locale == $k) {
                                                         $title = $journal->journalTranslations[$step]->title;
                                                     }
                                                    
@@ -57,7 +57,7 @@
                                                     {{ $k }}:</label>
                                                 @php
                                                     $body = null;
-                                                    if (count($journal->journalTranslations) > 0 && $journal->journalTranslations[$step]->locale == $k) {
+                                                    if (count($journal->journalTranslations) > 0 && isset($journal->journalTranslations[$step]) && $journal->journalTranslations[$step]->locale == $k) {
                                                         $body = $journal->journalTranslations[$step]->body;
                                                     }
                                                 @endphp

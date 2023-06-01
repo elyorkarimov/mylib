@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ExportBookLanguage;
 use App\Models\BookLanguage;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 /**
  * Class BookLanguageController
@@ -11,20 +13,59 @@ use Illuminate\Http\Request;
  */
 class BookLanguageController extends Controller
 {
+        /**
+     * create a new instance of the class
+     *
+     * @return void
+     */
+    function __construct()
+    {
+        $this->middleware(['role:SuperAdmin|Admin|Manager']);
+
+        // $this->middleware('permission:list|create|edit|delete|user-list|user-create|user-edit|user-delete', ['only' => ['index', 'store']]);
+        // $this->middleware('permission:create|user-create', ['only' => ['create', 'store']]);
+        // $this->middleware('permission:edit|user-edit', ['only' => ['edit', 'update']]);
+        // $this->middleware('permission:delete|user-delete', ['only' => ['destroy']]);
+        // $this->middleware('permission:deletedb', ['only' => ['destroyDB']]);
+        //  $this->middleware('permission:list|create|edit|delete', ['only' => ['index', 'store']]);
+        //  $this->middleware('permission:create', ['only' => ['create', 'store']]);
+        //  $this->middleware('permission:edit', ['only' => ['edit', 'update']]);
+        //  $this->middleware('permission:delete', ['only' => ['destroy']]);
+        //  $this->middleware('permission:deletedb', ['only' => ['destroyDB']]);
+
+    }
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index($language, Request $request)
     {
         $perPage = 20;
-        $bookLanguages = BookLanguage::orderBy('id', 'desc')->paginate($perPage);
+        $keyword=trim($request->get('keyword'));
+        $q = BookLanguage::query();
+        $perPage = 20;
+        if($keyword != null){ 
+            $q->whereHas('translations', function ($query) use ($keyword) {
+                if($keyword) {
+                    $query->where('title', 'like', '%'.$keyword.'%');
+                }
+            }); 
+        }
 
-        return view('book-language.index', compact('bookLanguages'))
+        $bookLanguages = $q->withCount('books')->with('translations')->paginate($perPage);
+
+        return view('book-language.index', compact('bookLanguages', 'keyword'))
             ->with('i', (request()->input('page', 1) - 1) * $bookLanguages->perPage());
     }
 
+    
+    public function export($language, Request $request){
+        $file_name = 'book-language_'.date('Y_m_d_H_i_s').'.xlsx';
+        $keyword=trim($request->get('keyword'));
+
+        return Excel::download(new ExportBookLanguage($keyword), $file_name);
+    }
     /**
      * Show the form for creating a new resource.
      *
@@ -100,7 +141,6 @@ class BookLanguageController extends Controller
      */
     public function update($language, Request $request, BookLanguage $bookLanguage)
     {
-
         request()->validate(
             BookLanguage::rules(),
             [
@@ -137,5 +177,26 @@ class BookLanguageController extends Controller
         toast(__('Deleted successfully.'), 'info');
 
         return redirect()->route('book-languages.index', app()->getLocale());
+    }
+    /**
+     * Write code on Method
+     *
+     * @return response()
+     */
+    public function delete($language, $id, Request $request)
+    {
+        $type=$request->input('type');
+
+        // BooksType::find($id)->delete();
+        $bookLanguage= BookLanguage::find($id);
+        if($type=='DELETE'){
+            BookLanguage::find($id)->delete();
+            // $booksType->isActive=false;
+            // $booksType->Save();
+            toast(__('Deleted successfully.'), 'info');
+            return back();    
+        }else{
+            return view('book-languages.show', compact('bookLanguage'));
+        }
     }
 }

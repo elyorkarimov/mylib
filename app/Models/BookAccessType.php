@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Astrotomic\Translatable\Translatable;
 use Astrotomic\Translatable\Contracts\Translatable as TranslatableContract;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class BookAccessType
@@ -30,6 +31,7 @@ use Astrotomic\Translatable\Contracts\Translatable as TranslatableContract;
 class BookAccessType extends Model implements TranslatableContract
 {
 
+
     use Translatable; // 2. To add translation methods
     public $translatedAttributes = ['title', 'locale', 'slug'];
 
@@ -49,6 +51,34 @@ class BookAccessType extends Model implements TranslatableContract
     {
         return $this->hasMany('App\Models\Book', 'book_access_type_id', 'id');
     }
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\hasMany
+     */
+    public function journals()
+    {
+        return $this->hasMany('App\Models\Journal', 'book_access_type_id', 'id');
+    }
+    public static function GetCountBookCopiesByBookTypeId($id = null)
+    {
+        $cards = DB::select("SELECT COUNT(*) as nusxa FROM `book_access_types` as bt left JOIN books as b on b.book_access_type_id =bt.id left join book_inventars as bil on bil.book_id=b.id where b.status=1 and bil.isActive=1 and bt.id=$id GROUP by bt.id;");
+
+        if (count($cards) > 0) {
+            return $cards[0]->nusxa;
+        }
+        return 0;
+    }
+
+    public static function GetCountBookByBookTypeId($id = null)
+    {
+        $cards = DB::select("SELECT SUM(COUNT(DISTINCT bil.book_id)) OVER() as nomda FROM `book_access_types` as bt left JOIN books as b on b.book_access_type_id =bt.id left join book_inventars as bil on bil.book_id=b.id where b.status=1 and bil.isActive=1 and bt.id=$id GROUP by bil.book_id limit 1;");
+
+        if (count($cards) > 0) {
+            return $cards[0]->nomda;
+        }
+        return 0;
+    }
+
+    
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */

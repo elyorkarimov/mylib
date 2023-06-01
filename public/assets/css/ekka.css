@@ -38,7 +38,7 @@
   --bs-font-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --bs-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
   --bs-body-font-family: Roboto, sans-serif;
-  --bs-body-font-size: 0.875rem;
+  --bs-body-font-size: 0.975rem;
   --bs-body-font-weight: 400;
   --bs-body-line-height: 1.5;
   --bs-body-color: #8a909d;
@@ -2311,10 +2311,10 @@ progress {
   font-size: 0.875rem;
   font-weight: 400;
   line-height: 1.5;
-  color: #8a909d;
-  background-color: #fdfdfd;
+  color: #000;
+  background-color: #fff;
   background-clip: padding-box;
-  border: 1px solid #ced4da;
+  border: 1px solid #000;
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
@@ -2337,7 +2337,7 @@ progress {
   cursor: pointer;
 }
 .form-control:focus {
-  color: #8a909d;
+  color: #000;
   background-color: #fdfdfd;
   border-color: #c4d5f9;
   outline: 0;
@@ -2552,7 +2552,7 @@ textarea.form-control-lg {
   font-size: 0.875rem;
   font-weight: 400;
   line-height: 1.5;
-  color: #8a909d;
+  color: #000;
   background-color: #fdfdfd;
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
   background-repeat: no-repeat;
@@ -17209,7 +17209,6 @@ button {
 
 /*===== BADGE =====*/
 .badge {
-  text-transform: uppercase;
   color: #ffffff;
   padding-top: 0.75em;
 }
@@ -19117,13 +19116,13 @@ code {
   margin-bottom: 1.25rem;
 }
 .form-group label, .input-group label {
-  color: #56606e;
+  color: #000;
   font-size: 15px;
 }
 .form-group .form-control, .input-group .form-control {
   font-size: 15px;
   padding: 0.5rem 1.06rem;
-  border-color: #f3f3f3;
+  border-color: #000;
 }
 .form-group .form-control.input-lg, .input-group .form-control.input-lg {
   font-size: 1.06rem;
@@ -21001,7 +21000,7 @@ div.copied {
 .sidebar .sidebar-inner > li > a {
   padding: 15px 25px;
   line-height: 20px;
-  color: #a6aab4;
+  color: #f7f8fa;
   display: block;
   text-decoration: none;
   text-transform: uppercase;
@@ -21024,11 +21023,10 @@ div.copied {
 .sidebar .sidebar-inner > li > a:before {
   position: absolute;
   content: "";
-  left: 5px;
+  left: 0px;
   top: 0;
-  width: 5px;
+  width: 10px;
   height: 100%;
-  border-radius: 5px;
   background: #88aaf3;
   opacity: 0;
 }
@@ -21052,7 +21050,7 @@ div.copied {
 .ec-brand {
   position: relative;
   display: block;
-  background-color: transparent;
+  background-color: #fff ;
 }
 .ec-brand a {
   display: -webkit-box;
@@ -21164,9 +21162,10 @@ div.copied {
 /*  sub-menu dropdowns */
 .sidebar .sub-menu {
   list-style-type: none;
-  padding: 0.625rem 0 0.625rem 2.81rem;
+  padding: 0.625rem 0 0.625rem 0.81rem;
   margin: 0;
   position: relative;
+  border-bottom: 7px solid #88aaf3;
 }
 .sidebar .sub-menu > li > a {
   padding: 0.625rem 1.25rem 0.625rem 0.94rem;
@@ -21843,16 +21842,16 @@ div.copied {
 
 /* Sidebar Light */
 .ec-sidebar-light .ec-left-sidebar {
-  background-color: #ffffff;
+  background-color: #343a40;
 }
 .ec-sidebar-light .sidebar {
-  border-right: 1px solid #f3f3f3;
+  /* border-right: 1px solid #f3f3f3; */
 }
 .ec-sidebar-light .sidebar .sub-menu {
   background-color: #f7f7f7;
 }
 .ec-sidebar-light .sidebar .sub-menu > li > a {
-  color: #8a909d;
+  color: #000;
 }
 .ec-sidebar-light .sidebar .sub-menu > li > a.active {
   color: #4c515b;
@@ -21865,7 +21864,8 @@ div.copied {
   color: #4c515b;
 }
 .ec-sidebar-light .sidebar .nav > li.active > a {
-  color: #4c515b;
+  color: #000;
+  background-color: #fff;
 }
 .ec-sidebar-light .sidebar .separator {
   border-color: #f3f3f3;

@@ -1,12 +1,18 @@
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}"  class="no-js">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'AKBT') }}</title>
-    
+    {{-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" type="module"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.bundle.min.js" type="module"></script> --}}
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
     <!-- GOOGLE FONTS -->
     <link href="https://cdn.materialdesignicons.com/4.4.95/css/materialdesignicons.min.css" rel="stylesheet" />
     <link href="{{ asset('material/css/materialdesignicons.min.css') }}" rel="stylesheet" type="text/css" />
@@ -29,8 +35,9 @@
     @livewireStyles
 
     <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet" />
-    {{-- <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.8.1/dist/alpine.min.js" defer></script> --}}
     <script src="{{ asset('livewire/components/pdf-viewer.js') }}"></script>
+    <link href="{{ asset('tagsinput.css') }}" rel="stylesheet" type="text/css">
+    <script src="{{ asset('typeahead.bundle.js') }}"></script>
 </head>
 
 <body class="ec-header-fixed ec-sidebar-fixed ec-sidebar-light ec-header-light" id="body">
@@ -38,6 +45,7 @@
 
     <!--  WRAPPER  -->
     <div class="wrapper">
+       
 
         <!-- LEFT MAIN SIDEBAR -->
         @include('layouts.partials.sidebar')
@@ -97,7 +105,6 @@
             $(".js-example-basic-single-with-tags").select2({
                 tags: true,
             })
-
         });
     </script>
     @yield('scripts')
@@ -140,7 +147,7 @@
                 });
         });
     </script>
-    <script>
+     <script>
         var barcode = '';
         var interval;
         document.addEventListener('keydown', function(evt) {
@@ -164,6 +171,11 @@
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script>
         $(document).ready(function() {
+
+            $(".clickable-row").click(function() {
+                window.location = $(this).data("href");
+            });
+
             $('#state').on('change', function() {
                 var stateID = $(this).val();
                 if (stateID) {
@@ -196,7 +208,8 @@
             });
         });
     </script>
-
+        <script src="{{ asset('tagsinput.js') }}"></script>
+        
 </body>
 
 </html>

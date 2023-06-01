@@ -70,6 +70,7 @@ class RegisterController extends Controller
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
+            'login' => $data['email'],
         ]);
         $user->assignRole('User');
         
@@ -83,6 +84,6 @@ class RegisterController extends Controller
     }
     public function redirectTo()
     {
-        return app()->getLocale() . '/home';
+        return app()->getLocale() . '/';
     }
 }

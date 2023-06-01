@@ -6,28 +6,39 @@ use App\Models\Book;
 use App\Models\BookLanguage;
 use App\Models\BooksType;
 use App\Models\BookSubject;
+use App\Models\Debtor;
 use App\Models\Journal;
 use App\Models\MagazineIssue;
 use App\Models\Udc;
+use GuzzleHttp\Client;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use romanzipp\Seo\Structs\Title;
+use romanzipp\Seo\Structs\Meta\Description;
+
 
 class SiteController extends Controller
 {
 
     public function index()
     {
-        $bookTypes = BooksType::active()->translatedIn(app()->getLocale())->limit(5)->get();        
-        $books = Book::active()->orderBy('id', 'desc')->limit(8)->get();
-        $journals = Journal::active()->orderBy('id', 'desc')->limit(8)->get();
-        $magazines = MagazineIssue::active()->orderBy('id', 'desc')->translatedIn(app()->getLocale())->limit(12)->get();
-        
-        return view('site.index', compact('bookTypes', 'books', 'journals', 'magazines'));
+        $bookTypes = BooksType::active()->with('translations')->translatedIn(app()->getLocale())->limit(5)->get();        
+        // $books = Book::active()->with(['booksType', 'booksType.translations'])->orderBy('id', 'desc')->limit(8)->get();
+        $journals = Journal::active()->with(['translations', 'booksType', 'booksType.translations'])->orderBy('id', 'desc')->limit(8)->get();
+        $magazines = MagazineIssue::active()->with(['translations', 'journal', 'journal.translations'])->orderBy('id', 'desc')->translatedIn(app()->getLocale())->limit(12)->get();
+        $topBooks =  DB::table('debtors')
+        ->select('book_id', DB::raw('count(*) as total'))
+        ->groupBy('book_id')
+        ->orderBy('total', 'DESC')
+        ->limit(10)
+        ->get();
+        return view('site.index', compact('bookTypes', 'journals', 'magazines', 'topBooks'));
     }
 
     public function categories()
     {
 
-        $bookTypes = BooksType::active()->translatedIn(app()->getLocale())->limit(5)->get();
+        $bookTypes = BooksType::active()->with('translations')->translatedIn(app()->getLocale())->limit(5)->get();
         return redirect()->route('welcome', app()->getLocale());
 
         // return view('site.index', compact('bookTypes'));
@@ -41,7 +52,7 @@ class SiteController extends Controller
     public function category($language, $slug)
     {
 
-        $bookTypes = BooksType::active()->translatedIn(app()->getLocale())->limit(5)->get();
+        $bookTypes = BooksType::active()->with('translations')->translatedIn(app()->getLocale())->limit(5)->get();
         // dd("all categories slug $slug");
         return redirect()->route('welcome', app()->getLocale());
 
@@ -83,48 +94,17 @@ class SiteController extends Controller
         $bookSubject = trim($request->get('bookSubject'));
         
         $perPage = 12;
-        // if (!empty($language) && !empty($type) && !empty($bookSubject) ) {
-            
-        //     $books = Book::where('book_language_id', '=', $language)->where('books_type_id', '=', $type)->whereJsonContains('dc_subjects', $bookSubject)->active()->latest()->paginate($perPage);
-        // }elseif (!empty($language) && !empty($type)) {
-        //     $books = Book::where('book_language_id', '=', $language)->where('books_type_id', '=', $type)->active()->latest()->paginate($perPage);
-        // }elseif (!empty($language) && !empty($bookSubject) ) {
-        //     $books = Book::where('book_language_id', '=', $language)->whereJsonContains('dc_subjects', $bookSubject)->active()->latest()->paginate($perPage);
-        // }elseif ( !empty($type) && !empty($bookSubject) ) {
-        //     $books = Book::where('books_type_id', '=', $type)->whereJsonContains('dc_subjects', $bookSubject)->active()->latest()->paginate($perPage);
-        // } elseif (!empty($language)) {
-        //     $books = Book::where('book_language_id', '=', $language)->active()->latest()->paginate($perPage);
-        // } elseif (!empty($type)) {
-        //     $books = Book::where('books_type_id', '=', $type)->active()->latest()->paginate($perPage);
-        // } elseif (!empty($bookSubject)) {
-        //     $books = Book::whereJsonContains('dc_subjects', $bookSubject)->active()->latest()->paginate($perPage);        
-        // } elseif (!empty($keyword)) {
-        //     $books = Book::Where('title', 'LIKE', "%$keyword%")
-        //         ->orWhere('author', 'LIKE', "%$keyword%")
-        //         ->orWhere('isbn', 'LIKE', "%$keyword%")
-        //         ->orWhere('UDK', 'LIKE', "%$keyword%")
-        //         ->orWhere('published_year', 'LIKE', "%$keyword%")
-        //         // ->orWhere('apply_no', 'LIKE', "%$keyword%")
-        //         // ->orWhere('photo', 'LIKE', "%$keyword%")
-        //         // ->orWhere('organization_of_issue3', 'LIKE', "%$keyword%")
-        //         // ->orWhere('grade3', 'LIKE', "%$keyword%")
-        //         // ->orWhere('score3', 'LIKE', "%$keyword%")
-        //         // ->orWhere('date3', 'LIKE', "%$keyword%")
-        //         // ->orWhere('changed', 'LIKE', "%$keyword%")
-        //         ->active()->latest()->paginate($perPage);
-        // } else {
-        //     $books = Book::active()->latest()->paginate($perPage);
-        // }
+        
         $show_accardion=false;
         $q = Book::query();
  
-        $book_bookType_id=trim($request->get('book_type_id'));
-        $book_bookLanguage_id=trim($request->get('book_language_id'));
+        $book_bookType_id=trim($request->get('type'));
+        $book_bookLanguage_id=trim($request->get('language'));
         $book_bookText_id=trim($request->get('book_text_id'));
         $book_bookTextType_id=trim($request->get('book_text_type_id'));
         $book_access_type_id=trim($request->get('book_access_type_id'));
         $book_file_type_id=trim($request->get('book_file_type_id'));
-        $book_subject_id=trim($request->get('book_subject_id'));
+        $book_subject_id=trim($request->get('bookSubject'));
         $book_author_id=trim($request->get('book_author_id'));
         $status=trim($request->get('status'));
         $keyword=trim($request->get('keyword'));
@@ -161,11 +141,11 @@ class SiteController extends Controller
             $show_accardion=true;
             $q->where('book_file_type_id', '=', $book_file_type_id);
         }
-        if ($book_subject_id != null && $book_subject_id>0)
+        if ($book_subject_id != null)
         {
             $show_accardion=true;
             $dc_subjects = \App\Models\BookSubject::GetTitleById($book_subject_id);
-            $q->whereJsonContains('dc_subjects', $dc_subjects);
+            $q->whereJsonContains('dc_subjects', $book_subject_id);
         }
         
         if ($book_author_id != null && $book_author_id>0)
@@ -189,10 +169,10 @@ class SiteController extends Controller
             ->orWhere('ISBN', 'LIKE', "%$keyword%")
             ->orWhere('published_year', 'LIKE', "%$keyword%");
         }
-        $bookTypes = BooksType::active()->translatedIn(app()->getLocale())->get();
-        $bookLanguages = BookLanguage::active()->translatedIn(app()->getLocale())->get();
-        $bookSubjects = BookSubject::active()->translatedIn(app()->getLocale())->get();
-        $books = $q->with('bookInventar')->orderBy('id', 'desc')->paginate($perPage);
+        $bookTypes = BooksType::active()->with('translations')->translatedIn(app()->getLocale())->get();
+        $bookLanguages = BookLanguage::active()->with('translations')->translatedIn(app()->getLocale())->get();
+        $bookSubjects = BookSubject::active()->with('translations')->translatedIn(app()->getLocale())->get();
+        $books = $q->with('bookInventar')->with(['booksType', 'booksType.translations'])->orderBy('id', 'desc')->paginate($perPage);
 
         return view('site.books', compact('books', 'bookTypes', 'bookLanguages', 'bookSubjects', 'type', 'language', 'bookSubject'));
     }
@@ -205,9 +185,9 @@ class SiteController extends Controller
     public function book($language, $slug)
     {
 
-        $book = Book::active()->where('slug', $slug)->first();
+        $book = Book::active()->where('id', $slug)->first();
         if($book!=null){
-            $books = Book::active()->where('books_type_id', $book->books_type_id)->where('id', '<>', $book->id)->limit(8)->get();
+            $books = Book::active()->with(['booksType', 'booksType.translations'])->where('books_type_id', $book->books_type_id)->where('id', '<>', $book->id)->limit(8)->get();
             return view('site.bookdetails', compact('book', 'books'));
         }else{
             abort(404);
@@ -219,9 +199,9 @@ class SiteController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function bookpdf($language, $slug)
+    public function bookpdf($language, $id)
     {
-        $book = Book::active()->where('slug', $slug)->first();
+        $book = Book::active()->where('id', $id)->first();
         if($book!=null){
             return view('site.bookdetailspdf', compact('book'));
         }else{
@@ -232,8 +212,8 @@ class SiteController extends Controller
     public function journals()
     {
         $perPage = 12;
-        $journals = Journal::active()->orderBy('id', 'desc')->paginate($perPage);
-        $bookSubjects = BookSubject::active()->translatedIn(app()->getLocale())->get();
+        $journals = Journal::active()->with(['translations', 'booksType', 'booksType.translations'])->orderBy('id', 'desc')->paginate($perPage);
+        $bookSubjects = BookSubject::active()->with('translations')->translatedIn(app()->getLocale())->get();
         return view('site.journals', compact('journals', 'bookSubjects'));
     }
  

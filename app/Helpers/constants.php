@@ -24,3 +24,5 @@ define('DEFAULT_PAGE_TITLE', '� � � � � ');
 
  $__DIN_SPRAV__ = array('author', 'keys', 'caption', 'years', 'bbk_ind', 'publisher', 'block', 'prog_name', 
     'class', 'udk', 'publ_place', 'box_ind', 'part_ind', 'source_name', 'cont_num', 'company_name');
+
+

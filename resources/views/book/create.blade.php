@@ -16,18 +16,20 @@
             </p>
         </div>
         <div>
-            <a class="btn btn-primary" href="{{ url(app()->getLocale() . '/admin/books') }}">
-                {{ __('Back') }}</a>
+
+            <a href="{{ url()->previous() }}"  class="btn btn-primary" >{{ __('Back') }}</a>
         </div>
     </div> 
-    
-    <livewire:admin.books.create :import_book='$import' />
-    {{-- <form method="POST" action="{{ route('books.store', app()->getLocale()) }}"  role="form" enctype="multipart/form-data">
+    {{-- <livewire:admin.books.create :import_book='$import' /> --}}
+    <form method="POST" action="{{ route('books.store', app()->getLocale()) }}"  role="form" enctype="multipart/form-data">
         @csrf
-
+        @if ($import != null)
+            <input type="hidden" value="{{$import->id}}" name="import_id">            
+        @endif
+        
         @include('book.form')
-
-    </form> --}}
+    
+    </form> 
 
 </div>            
 @endsection

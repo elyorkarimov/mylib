@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\OrderDetail;
 use Illuminate\Http\Request;
 
 /**
@@ -11,17 +12,56 @@ use Illuminate\Http\Request;
  */
 class OrderController extends Controller
 {
+        /**
+     * create a new instance of the class
+     *
+     * @return void
+     */
+    function __construct()
+    {
+        $this->middleware(['role:SuperAdmin|Admin|Manager']);
+
+        // $this->middleware('permission:list|create|edit|delete|user-list|user-create|user-edit|user-delete', ['only' => ['index', 'store']]);
+        // $this->middleware('permission:create|user-create', ['only' => ['create', 'store']]);
+        // $this->middleware('permission:edit|user-edit', ['only' => ['edit', 'update']]);
+        // $this->middleware('permission:delete|user-delete', ['only' => ['destroy']]);
+        // $this->middleware('permission:deletedb', ['only' => ['destroyDB']]);
+        //  $this->middleware('permission:list|create|edit|delete', ['only' => ['index', 'store']]);
+        //  $this->middleware('permission:create', ['only' => ['create', 'store']]);
+        //  $this->middleware('permission:edit', ['only' => ['edit', 'update']]);
+        //  $this->middleware('permission:delete', ['only' => ['destroy']]);
+        //  $this->middleware('permission:deletedb', ['only' => ['destroyDB']]);
+
+    }
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index($language, Request $request)
     {
         $perPage = 20;
-        $orders = Order::orderBy('id', 'desc')->paginate($perPage);
+        $q = Order::query();
 
-        return view('order.index', compact('orders'))
+        $order_number = trim($request->get('order_number'));
+        $status = trim($request->get('status'));
+        $order_date = trim($request->get('order_date'));
+
+        if($order_number != null && $order_number>0){
+            $q->orWhere('order_number', '=', $order_number);
+        }
+        if($status != null){
+            $q->orWhere('status', '=', $status);
+        }
+        if($status != null){
+            $q->orWhere('order_date', '=', $order_date);
+        }else{
+            $q->where('status', '>', 0);
+        }
+        
+        $orders = $q->with(['reader', 'reader.profile'])->orderBy('created_at', 'desc')->paginate($perPage);
+
+        return view('order.index', compact('orders', 'order_number', 'status', 'order_date'))
             ->with('i', (request()->input('page', 1) - 1) * $orders->perPage());
     }
 
@@ -63,7 +103,14 @@ class OrderController extends Controller
     {
         $order = Order::find($id);
 
+        if($order!=null && $order->status==Order::$SENT){
+            $order = Order::ChangeStatus($id, Order::$ACCEPTED);
+        }
+        if($order==null){
+            abort(404);
+        }
         return view('order.show', compact('order'));
+
     }
 
     /**
@@ -104,7 +151,20 @@ class OrderController extends Controller
      */
     public function destroy($language, $id)
     {
-        $order = Order::find($id)->delete();
+
+        // $order = Order::find($id)->delete();
+        // $order = Order::find($id);
+        Order::ChangeStatus($id, Order::$DELETED);
+
+        // $order->status=Order::$DELETED;
+        // if($order->orderDetails != null && $order->orderDetails->count()>0){
+        //     foreach($order->orderDetails as $k=>$v){
+        //         $detail=OrderDetail::find($v->id);
+        //         $detail->status=Order::$DELETED;
+        //         $detail->save();
+        //     }
+        // }
+        // $order->save();
         toast(__('Deleted successfully.'), 'info');
 
         return redirect()->route('orders.index', app()->getLocale());

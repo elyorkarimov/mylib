@@ -11,6 +11,27 @@ use Illuminate\Http\Request;
  */
 class GroupController extends Controller
 {
+        /**
+     * create a new instance of the class
+     *
+     * @return void
+     */
+    function __construct()
+    {
+        $this->middleware(['role:SuperAdmin|Admin|Manager']);
+
+        // $this->middleware('permission:list|create|edit|delete|user-list|user-create|user-edit|user-delete', ['only' => ['index', 'store']]);
+        // $this->middleware('permission:create|user-create', ['only' => ['create', 'store']]);
+        // $this->middleware('permission:edit|user-edit', ['only' => ['edit', 'update']]);
+        // $this->middleware('permission:delete|user-delete', ['only' => ['destroy']]);
+        // $this->middleware('permission:deletedb', ['only' => ['destroyDB']]);
+        //  $this->middleware('permission:list|create|edit|delete', ['only' => ['index', 'store']]);
+        //  $this->middleware('permission:create', ['only' => ['create', 'store']]);
+        //  $this->middleware('permission:edit', ['only' => ['edit', 'update']]);
+        //  $this->middleware('permission:delete', ['only' => ['destroy']]);
+        //  $this->middleware('permission:deletedb', ['only' => ['destroyDB']]);
+
+    }
     /**
      * Display a listing of the resource.
      *
@@ -19,7 +40,7 @@ class GroupController extends Controller
     public function index()
     {
         $perPage = 20;
-        $groups = Group::orderBy('id', 'desc')->paginate($perPage);
+        $groups = Group::with(['organization', 'branch', 'faculty', 'chair', 'organization.translations',  'branch.translations', 'faculty.translations', 'chair.translations'])->withCount('profiles')->orderBy('id', 'desc')->paginate($perPage);
 
         return view('group.index', compact('groups'))
             ->with('i', (request()->input('page', 1) - 1) * $groups->perPage());
@@ -108,5 +129,26 @@ class GroupController extends Controller
         toast(__('Deleted successfully.'), 'info');
 
         return redirect()->route('groups.index', app()->getLocale());
+    }
+      /**
+     * Write code on Method
+     *
+     * @return response()
+     */
+    public function delete($language, $id, Request $request)
+    {
+        $type=$request->input('type');
+
+        // BooksType::find($id)->delete();
+        $booksType= Group::find($id);
+        if($type=='DELETE'){
+            Group::find($id)->delete();
+            // $booksType->isActive=false;
+            // $booksType->Save();
+            toast(__('Deleted successfully.'), 'info');
+            return back();    
+        }else{
+            return view('book-types.show', compact('booksType'));
+        }
     }
 }

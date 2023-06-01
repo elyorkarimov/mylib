@@ -1,6 +1,8 @@
 <div class="box box-info padding-1">
     <div class="box-body">
-        
+        @php
+            dd($import);
+        @endphp
         <div class="form-group">
             {{ Form::label('title') }}
             {{ Form::text('title', $import->title, ['class' => 'form-control' . ($errors->has('title') ? ' is-invalid' : ''), 'placeholder' => 'Title']) }}
@@ -45,7 +47,7 @@
             {{ Form::label('description') }}
             {{ Form::text('description', $import->description, ['class' => 'form-control' . ($errors->has('description') ? ' is-invalid' : ''), 'placeholder' => 'Description']) }}
             {!! $errors->first('description', '<div class="invalid-feedback">:message</div>') !!}
-        </div>
+        </div> 
         <div class="form-group">
             {{ Form::label('published_date') }}
             {{ Form::text('published_date', $import->published_date, ['class' => 'form-control' . ($errors->has('published_date') ? ' is-invalid' : ''), 'placeholder' => 'Published Date']) }}

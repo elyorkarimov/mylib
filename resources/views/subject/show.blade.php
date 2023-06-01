@@ -26,6 +26,10 @@
                 <div class="card">
                     <div class="card-body">
                         
+                        <div class="form-group">
+                            <strong>{{ __('IsActive') }}:</strong>
+                            {!! $subject->isActive == 1 ? '<span class="badge badge-success"><i class="mdi mdi-check-circle"></i></span>' : '<span class="badge badge-danger"><i class="mdi mdi-close-circle "></i></span>' !!}
+                        </div>
                         
                         <div class="form-group">
                             <strong>{{ __('Title') }}:</strong>
@@ -33,9 +37,19 @@
                         </div>
 
                         <div class="form-group">
-                            <strong>{{ __('IsActive') }}:</strong>
-                            {!! $subject->isActive == 1 ? '<span class="badge badge-success"><i class="mdi mdi-check-circle"></i></span>' : '<span class="badge badge-danger"><i class="mdi mdi-close-circle "></i></span>' !!}
+                            <strong>{{ __('Bibliographic record') }}:</strong>
+                            {{ $subject->books_count }}
                         </div>
+                        <div class="form-group">
+                            <strong>{{ __('Number of books') }}:</strong>
+                            {!! \App\Models\Subject::GetCountBookByBookTypeId($subject->id) !!}
+                        </div>
+                        <div class="form-group">
+                            <strong>{{ __('Books in Copy') }}:</strong>
+                            {!! \App\Models\Subject::GetCountBookCopiesByBookTypeId($subject->id) !!}
+                        </div>
+ 
+                        
                         <div class="form-group">
                             <strong>{{ __('Created By') }}:</strong>
                             {!! $subject->created_by ? $subject->createdBy->name : '' !!}

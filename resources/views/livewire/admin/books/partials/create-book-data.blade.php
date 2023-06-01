@@ -16,21 +16,56 @@
                         @endif
                         <div class="box box-info padding-1">
                             <div class="box-body">
+                                @if (in_array('SuperAdmin', $roles))
+
                                 <div class="form-group">
-                                    <label for="summarka_raqam">{{ __('Summarka Raqam') }}</label>
-                                    <input type="text"
-                                        class="form-control  {{ $errors->has('summarka_raqam') ? ' is-invalid' : '' }}"
-                                        placeholder="{{ __('Summarka Raqam') }}" name="summarka_raqam"
-                                        id="summarka_raqam" wire:model="summarka_raqam">
-                                    {!! $errors->first('summarka_raqam', '<div class="invalid-feedback">:message</div>') !!}
+                                    <label for="organization">{{ __('Organization') }}</label>
+                                    @if ($organizations->count() > 0)
+                                        <select wire:model="organization_id"
+                                            class="form-control {{ $errors->has('organization') ? ' is-invalid' : '' }}"
+                                            name="organization_id" id="organization_id">
+                                            <option value="" selected>{{ __('Choose') }}</option>
+                                            @foreach ($organizations as $k => $state)
+                                                <option value="{{ $k }}">{{ $state }}</option>
+                                            @endforeach
+                                        </select>
+                                        {!! $errors->first('organization_id', '<div class="invalid-feedback">:message</div>') !!}
+                                    @endif
+                                </div>
+                                @endif
+                                <div class="form-group">
+                                    <label for="branch_id">{{ __('Branches') }}</label>
+                                    @if (!is_null($organization_id))
+                                        <div>
+                                            <select id="branch_id"
+                                                class=" form-select form-control {{ $errors->has('branch_id') ? ' is-invalid' : '' }}"
+                                                wire:model="branch_id">
+                                                <option value="">{{ __('Choose') }}</option>
+                                                @foreach ($branches as $k => $v)
+                                                    <option value="{{ $k }}">{{ $v }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    @endif
+                                    {!! $errors->first('branch_id', '<div class="invalid-feedback">:message</div>') !!}
+    
                                 </div>
                                 <div class="form-group">
-                                    <label for="arrived_year">{{ __('Arrived Year') }}</label>
-                                    <input type="number"
-                                        class="form-control  {{ $errors->has('arrived_year') ? ' is-invalid' : '' }}"
-                                        placeholder="{{ __('Arrived Year') }}" name="arrived_year" id="arrived_year"
-                                        wire:model="arrived_year">
-                                    {!! $errors->first('arrived_year', '<div class="invalid-feedback">:message</div>') !!}
+                                    <label for="department_id">{{ __('Departments') }}</label>
+                                   
+                                    @if ($organization_id > 0 && $branch_id > 0)
+                                        <div>
+                                            <select id="department_id"
+                                                class=" form-select form-control {{ $errors->has('department_id') ? ' is-invalid' : '' }}"
+                                                wire:model="department_id">
+                                                <option value="">{{ __('Choose') }}</option>
+                                                @foreach ($departments as $k => $v)
+                                                    <option value="{{ $k }}">{{ $v }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    @endif
+                                    {!! $errors->first('department_id', '<div class="invalid-feedback">:message</div>') !!}
                                 </div>
                             </div>
                         </div>
@@ -43,61 +78,6 @@
                 <div class="ec-cat-list card card-default mb-24px">
                     <div class="card-body">
                         <div class="ec-cat-form">
-                            
-                            @if (in_array('SuperAdmin', $roles))
-
-                            <div class="form-group">
-                                <label for="organization">{{ __('Organization') }}</label>
-                                @if ($organizations->count() > 0)
-                                    <select wire:model="organization_id"
-                                        class="form-control {{ $errors->has('organization') ? ' is-invalid' : '' }}"
-                                        name="organization_id" id="organization_id">
-                                        <option value="" selected>{{ __('Choose') }}</option>
-                                        @foreach ($organizations as $k => $state)
-                                            <option value="{{ $k }}">{{ $state }}</option>
-                                        @endforeach
-                                    </select>
-                                    {!! $errors->first('organization_id', '<div class="invalid-feedback">:message</div>') !!}
-                                @endif
-                            </div>
-                            @endif
-                            <div class="form-group">
-                                <label for="branch_id">{{ __('Branches') }}</label>
-                                @if (!is_null($organization_id))
-                                    <div>
-                                        <select id="branch_id"
-                                            class=" form-select form-control {{ $errors->has('branch_id') ? ' is-invalid' : '' }}"
-                                            wire:model="branch_id">
-                                            <option value="0">{{ __('Choose') }}</option>
-                                            @foreach ($branches as $k => $v)
-                                                <option value="{{ $k }}">{{ $v }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                @endif
-                                {!! $errors->first('branch_id', '<div class="invalid-feedback">:message</div>') !!}
-
-                            </div>
-                            <div class="form-group">
-                                <label for="department_id">{{ __('Departments') }}</label>
-                               
-                                @if ($organization_id > 0 && $branch_id > 0)
-                                    <div>
-                                        <select id="department_id"
-                                            class=" form-select form-control {{ $errors->has('department_id') ? ' is-invalid' : '' }}"
-                                            wire:model="department_id">
-                                            <option value="0">{{ __('Choose') }}</option>
-                                            @foreach ($departments as $k => $v)
-                                                <option value="{{ $k }}">{{ $v }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                @endif
-                                {!! $errors->first('department_id', '<div class="invalid-feedback">:message</div>') !!}
-                            </div>
-
-
-
                             <div class="form-group">
                                 <div class="form-checkbox-box">
                                     <div class="form-check form-check-inline">
@@ -125,6 +105,12 @@
                                     </div>
                                 </div>
                             </div>
+                            @if (env('APP_NAME')=='AKBT_TSUL')
+                                <div class="form-group">
+                                    <label for="Nusxalar">{{__('Copies')}}</label>
+                                    <input class="form-control" placeholder="{{__('Copies')}}" name="copies" type="number" wire:model.lazy="copies">
+                                </div>
+                            @endif
                             <div class="row">
                                 <div class="col-12 box-footer mt20">
                                     {{-- <button type="submit" class="btn btn-primary">{{ __('Save') }}</button> --}}

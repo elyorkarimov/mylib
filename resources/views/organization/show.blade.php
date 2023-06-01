@@ -35,6 +35,10 @@
                             {{ $organization->title }}
                         </div> 
                         <div class="form-group">
+                            <strong>{{ __('Address') }}:</strong>
+                            {{ $organization->address }}
+                        </div> 
+                        <div class="form-group">
                             <strong>{{ __('Image') }}:</strong>
                             @if ($organization->image_path)
                                 <img src="{{ asset('/storage/organizations/photo/' . $organization->image_path) }}"

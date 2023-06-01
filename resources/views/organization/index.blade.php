@@ -32,6 +32,8 @@
                                     <th>No</th>
                                     <th>{{ __('Title') }}</th>
                                     <th>{{ __('IsActive') }}</th> 
+                                    <th>{{ __('Number of books') }}</th>
+                                    <th>{{ __('Books in Copy') }}</th>
                                     <th>{{ __('Image') }}</th>
 
 
@@ -43,14 +45,22 @@
                                     <tr>
                                         <td>{{ ++$i }}</td>
                                         
-                                        <td>{{ $organization->title }}</td>
+                                        <td>
+                                            {{ $organization->title }}
+                                        </td>
+                                        
                                         <td>{!! $organization->isActive == 1 ? '<span class="badge badge-success"><i class="mdi mdi-check-circle"></i></span>' : '<span class="badge badge-danger"><i class="mdi mdi-close-circle "></i></span>' !!}</td>
-
- 											<td> @if ($organization->image_path)
+                                        <td>
+                                            {{ $organization->book->count() }}
+                                        </td>
+                                        <td>
+                                            {{ $organization->bookInventar->count() }}
+                                        </td>
+ 										<td>
+                                            @if ($organization->image_path)
                                                 <img src="{{ asset('/storage/organizations/photo/' . $organization->image_path) }}" width="100px">
-                                            @endif</td>
-											 
-
+                                            @endif
+                                        </td>
                                         <td>
                                             <form action="{{ route('organizations.destroy',[app()->getLocale(), $organization->id]) }}" method="POST">
                                                 <a class="btn btn-sm btn-primary " href="{{ route('organizations.show', [app()->getLocale(), $organization->id]) }}"> {{ __('Show') }}</a>
@@ -59,6 +69,17 @@
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-danger btn-sm">{{ __('Delete') }}</button>
                                             </form>
+                                            @if (Auth::user()->hasRole('SuperAdmin'))
+                                                <br>
+                                                <form method="POST"
+                                                    action="{{ route('organizations.delete', [app()->getLocale(), 'id' => $organization->id]) }}">
+                                                    @csrf
+                                                    <input name="type" type="hidden" value="DELETE">
+                                                    <button type="submit"
+                                                        class="btn btn-sm btn-danger btn-flat show_confirm"
+                                                        data-toggle="tooltip">{{ __('Delete from DataBase') }}</button>
+                                                </form>
+                                            @endif
                                         </td>
                                     </tr>
                                 @endforeach                                    

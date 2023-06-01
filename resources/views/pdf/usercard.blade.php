@@ -60,23 +60,22 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 }
     
             }
-    
             .font {
                 height: 375px;
                 width: 250px;
                 position: relative;
                 border-radius: 10px;
             }
-    
-    
-    
+
+
+
             .bottom {
                 height: 70%;
                 width: 100%;
                 background-color: white;
                 position: absolute;
             }
-    
+
             .top img {
                 /* height: 150px;
                 width: 150px;
@@ -84,7 +83,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 left: 30px;
                 top: 5px; */
             }
-    
+
             .bottom p {
                 position: relative;
                 top: 60px;
@@ -94,63 +93,67 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 font-size: 20px;
                 text-emphasis: spacing;
             }
-    
+
             .bottom .desi {
                 font-size: 12px;
                 color: grey;
                 font-weight: normal;
             }
-    
+
             .bottom .no {
                 font-size: 15px;
                 font-weight: normal;
             }
-    
+
             .barcode img {
                 height: 150px;
                 width: 150px;
                 text-align: center;
             }
-    
+
             .barcode {
                 text-align: center;
                 position: absolute;
                 top: -7px;
                 right: -10px;
             }
-    
+
+           
             .back {
                 height: 243px;
                 width: 518px;
                 background-color: #ffffff;
                 border: 1px solid #8338ec;
             }
-    
+
             .qr img {
                 height: 80px;
                 width: 100%;
                 margin: 20px;
                 background-color: white;
             }
-    
+
             .Details {
                 color: white;
                 text-align: center;
                 padding: 5px;
-                font-size: 20px;
+                font-size: 15px;
                 background-color: #8338ec;
-                margin-bottom: 15px;
+                margin-bottom: 10px;
                 text-transform: uppercase;
             }
-    
-    
+
+
             .details-info {
-                line-height: 15px;
+                line-height: 8px;
             }
-    
+
             .logo {
                 width: 46%;
                 height: 40px;
+            }
+            .mb-10{
+                margin-bottom: 10px
             }
     
         </style> 
@@ -176,7 +179,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                                             <div class="row">
                                                                 <div class="col-md-4">
                                                                     <div class="top text-center">
-                                                                        <div class="form-group">
+                                                                        <div class="">
                                                                             @if ($user->profile->image)
                                                                                 <div class="align-items-left">
                                                                                     <img src="/storage/{{ $user->profile->image }}" style="width: 120px;max-width: 150px;">
@@ -185,7 +188,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                                                                 {{ __('No image') }}
                                                                             @endif
                                                                         </div>
-                                                                        <div class="form-group">
+                                                                        <div class="">
                                                                             <strong>{{ $user->name }}</strong>
                                                                         </div>
                                                                         
@@ -193,8 +196,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                                                 </div>
                                                                 <div class="col-md-7">
                                                                     <div class="details-info">
-                                                                         
-                                                                            <div class="form-group text-center" style="line-height: 17px;">
+                                                                            <div class=" text-center" style="line-height: 17px;">
                                                                                 @php
                                                                                     if ($user->inventar_number) {
                                                                                         $generator = new Picqer\Barcode\BarcodeGeneratorPNG();
@@ -205,20 +207,31 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                                                                 <span>{{ $user->inventar_number }}</span>
                                                                             </div>
                                                                         
-                                                                        <div class="form-group">
+                                                                        <div class="mb-10">
                                                                             <strong>{{ __('Email') }}:</strong>
                                                                             <span style="display:block; margin-top:8px">{{ $user->email }}</span>
                                                                         </div>
-                                                                        <div class="form-group">
+                                                                        <div class="mb-10">
                                                                             <strong>{{ __('Phone Number') }}:</strong>
                                                                             <span
                                                                                 style="display:block; margin-top:8px">{{ $user->profile->phone_number }}</span>
                                                                         </div>
-                                                                        <div class="form-group">
+                                                                        @if ($user->profile->date_of_birth)
+                                                                        <div class="mb-10">
                                                                             <strong>{{ __('Date Of Birth') }}:</strong>
                                                                             <span
                                                                                 style="display:block; margin-top:8px">{{ $user->profile->date_of_birth }}</span>
                                                                         </div>
+                                                                            
+                                                                        @endif
+                        
+                                                                        @if ($user->profile->faculty_id)
+                                                                            <div class="mb-10">
+                                                                                <strong>{{ __('Faculty') }}:</strong>
+                                                                                {!! $user->profile->faculty_id ? $user->profile->faculty->title : '' !!}
+                                                                            </div>
+                                                                            
+                                                                        @endif
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -226,7 +239,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                                             <div class="form-group text-center">
                                                                 <span style="display:block; margin-top:-12px;line-height: 15px;">
                                                                     {{-- Toshkent sh. Navoiy ko’chasi, 32 uy, 100011, Telefon(998-71)244-79-20 --}}
-                                                                
+                                                                    {!! $user->profile->organization ? $user->profile->organization->address: '' !!}
+
                                                                 </span>
                                                             </div>
                                                         </div>

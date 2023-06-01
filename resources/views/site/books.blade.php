@@ -18,44 +18,15 @@
         </div>
     </div>
 
-
     <div class="site-content space-bottom-3" id="content">
         <div class="container">
             <div class="row">
                 <div id="primary" class="content-area order-2">
-                    <div
-                        class="shop-control-bar d-lg-flex justify-content-between align-items-center mb-5 text-center text-md-left">
+                    <div class="shop-control-bar d-lg-flex justify-content-between align-items-center mb-5 text-center text-md-left">
                         <div class="shop-control-bar__left mb-4 m-lg-0">
                             <p class="woocommerce-result-count m-0"> {{__("Total")}}: <b>{{$books->total()}}</b> {{__("ta kitob")}}</p>
                         </div>
-                        <div class="shop-control-bar__right d-md-flex align-items-center">
-{{--                             
-                            <form class="woocommerce-ordering mb-4 m-md-0" method="get">
-                                <!-- Select -->
-                                <select class="js-select selectpicker dropdown-select orderby" name="orderby"
-                                    data-style="border-bottom shadow-none outline-none py-2">
-                                    <option value="popularity">Sort by popularity</option>
-                                    <option value="default" selected="selected">Default sorting</option>
-                                    <option value="date">Sort by newness</option>
-                                    <option value="price">Sort by price: low to high</option>
-                                    <option value="price-desc">Sort by price: high to low</option>
-                                </select>
-                                <!-- End Select -->
-                            </form>
-
-                            <form class="number-of-items ml-md-4 mb-4 m-md-0 d-none d-xl-block" method="get">
-                                <!-- Select -->
-                                <select class="js-select selectpicker dropdown-select orderby" name="orderby"
-                                    data-style="border-bottom shadow-none outline-none py-2" data-width="fit">
-                                    <option value="show10">Show 10</option>
-                                    <option value="show15">Show 15</option>
-                                    <option value="show20" selected="selected">Show 20</option>
-                                    <option value="show25">Show 25</option>
-                                    <option value="show30">Show 30</option>
-                                </select>
-                                <!-- End Select -->
-                            </form> --}}
-
+                        <div class="shop-control-bar__right d-md-flex align-items-center"> 
                             <ul class="nav nav-tab ml-lg-4 justify-content-center justify-content-md-start ml-md-auto"
                                 id="pills-tab" role="tablist">
                                 <li class="nav-item border">
@@ -125,7 +96,7 @@
                                             <div
                                                 class="woocommerce-LoopProduct-link woocommerce-loop-product__link d-block position-relative">
                                                 <div class="woocommerce-loop-product__thumbnail">
-                                                    <a href="{{ url(app()->getLocale() . '/books/' . $book->slug) }}"
+                                                    <a href="{{ url(app()->getLocale() . '/books/' . $book->id) }}"
                                                         title="{{ $book->dc_title }}" class="d-block">
                                                         @if ($book->image_path)
                                                             <img src="/storage/{{ $book->image_path }}"
@@ -142,12 +113,12 @@
                                                 </div>
                                                 <div class="woocommerce-loop-product__body product__body pt-3 bg-white">
                                                     <div class="text-uppercase font-size-1 mb-1 text-truncate"><a
-                                                            href="{{ url(app()->getLocale() . '/books/' . $book->slug) }}"
+                                                            href="{{ url(app()->getLocale() . '/books/' . $book->id) }}"
                                                             title="{{ $book->dc_title }}">{{ $book->booksType->title }}</a>
                                                     </div>
                                                     <h2
                                                         class="woocommerce-loop-product__title product__title h6 text-lh-md mb-1 text-height-2 crop-text-2 h-dark">
-                                                        <a href="{{ url(app()->getLocale() . '/books/' . $book->slug) }}"
+                                                        <a href="{{ url(app()->getLocale() . '/books/' . $book->id) }}"
                                                             title="{{ $book->dc_title }}">{{ $book->dc_title }}</a>
                                                     </h2>
                                                     <div class="font-size-2  mb-1 text-truncate">
@@ -161,7 +132,8 @@
                                                     </div>
                                                 </div>
                                                 <div class="product__hover d-flex align-items-center">
-                                                    @if ($book->dc_subjects)
+                                                    @if ($book->dc_subjects != "null" && $book->dc_subjects != null)
+
                                                         @foreach (json_decode($book->dc_subjects) as $subject)
                                                             {{-- <a href="{{ url(app()->getLocale() . '/authors/' . $author->slug) }}" class="text-gray-700"> --}}
                                                             {{ $subject }},
@@ -186,7 +158,7 @@
                                         <div class="product__inner overflow-hidden p-3 p-md-4d875">
                                             <div class="woocommerce-LoopProduct-link woocommerce-loop-product__link row position-relative">
                                                 <div class="col-md-auto woocommerce-loop-product__thumbnail mb-3 mb-md-0">
-                                                    <a href="{{ url(app()->getLocale() . '/books/' . $book->slug) }}" title="{{ $book->dc_title }}" class="d-block">
+                                                    <a href="{{ url(app()->getLocale() . '/books/' . $book->id) }}" title="{{ $book->dc_title }}" class="d-block">
                                                         @if ($book->image_path)
                                                             <img src="/storage/{{ $book->image_path }}"
                                                                 class="img-fluid d-block mx-auto attachment-shop_catalog size-shop_catalog wp-post-image img-fluid"
@@ -203,10 +175,10 @@
                                                 <div
                                                     class="col-md woocommerce-loop-product__body product__body pt-3 bg-white mb-3 mb-md-0">
                                                     <div class="text-uppercase font-size-1 mb-1 text-truncate">
-                                                        <a  href="{{ url(app()->getLocale() . '/books/' . $book->slug) }}" title="{{ $book->dc_title }}" >{{ $book->booksType->title }}</a></div>
+                                                        <a  href="{{ url(app()->getLocale() . '/books/' . $book->id) }}" title="{{ $book->dc_title }}" >{{ $book->booksType->title }}</a></div>
                                                     <h2
                                                         class="woocommerce-loop-product__title product__title h6 text-lh-md mb-1 crop-text-2 h-dark">
-                                                        <a  href="{{ url(app()->getLocale() . '/books/' . $book->slug) }}" title="{{ $book->dc_title }}" tabindex="{{$k}}">{{ $book->dc_title }}</a>
+                                                        <a  href="{{ url(app()->getLocale() . '/books/' . $book->id) }}" title="{{ $book->dc_title }}" tabindex="{{$k}}">{{ $book->dc_title }}</a>
                                                     </h2>
                                                     <div class="font-size-2  mb-2 text-truncate">
                                                         @if ($book->dc_authors)

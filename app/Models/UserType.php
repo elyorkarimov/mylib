@@ -52,7 +52,14 @@ class UserType extends Model implements TranslatableContract
         return $this->hasMany('App\Models\UserTypeTranslation', 'user_type_id', 'id');
     }
     
-
+ /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function users()
+    {
+        return $this->hasMany('App\Models\UserProfile', 'user_type_id', 'id');
+    }
+     
    
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne

@@ -9,7 +9,7 @@ use Astrotomic\Translatable\Translatable;
 use Astrotomic\Translatable\Contracts\Translatable as TranslatableContract;
 
 /**
- * Class ReferenceGender
+ * Class ReferenceGender 
  *
  * @property $id
  * @property $code
@@ -111,6 +111,15 @@ class ReferenceGender extends Model implements TranslatableContract
         return $rules;
     }
 
-    
-
+    public static function GetIdOrCreateData($name){
+        // $gender = self::
+    }
+ /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function users()
+    {
+        return $this->hasMany('App\Models\UserProfile', 'gender_id', 'id');
+    }
+ 
 }

@@ -22,15 +22,13 @@
             <ul class="nav navbar-nav">
                 @php
                     $carts = session()->get('cart', []);
-
                 @endphp
                 @if (count($carts)>0)
                     <li class=" right-sidebar-2-menu">
                         <a href="{{ url(app()->getLocale() . '/admin/cart') }}"><i class="mdi mdi-cart"></i>
                         <span class="badge badge-success navbar-badge">{{count($carts)}}</span>
                         </a>
-                    </li>  
-                    
+                    </li>
                 @endif
                 <!-- User Account -->
                 <li class="dropdown user-menu">

@@ -22,13 +22,13 @@ class CreateAdminUserSeeder extends Seeder
             'name' => 'Karimov Elyor',
             'inventar_number' => 'f1',
             'email' => 'karimovelyor@gmail.com',
-            'password' => bcrypt('123456789')
+            'login' => 'karimovelyor@gmail.com',
+            'password' => bcrypt('$$19Alom')
         ]);
         $userProfileData=[
             'phone_number'=>  "99893249889",
             'organization_id'=>  1,
             'branch_id'=>  1,
-            'department_id'=>  1,
             'user_id'=>  $user->id,
         ];
         UserProfile::create($userProfileData);
@@ -43,9 +43,41 @@ class CreateAdminUserSeeder extends Seeder
         
         $role = Role::create(['name' => 'Admin']);
         $role = Role::create(['name' => 'Manager']);
-        $role = Role::create(['name' => 'Author']);
+        // $role = Role::create(['name' => 'Accountant']);
         $role = Role::create(['name' => 'Reader']);
+        $role = Role::create(['name' => 'Author']);
         $role = Role::create(['name' => 'User']);
+
+        // $user = User::create([
+        //     'name' => 'Ашуралиев Ўлмасжон Темур ўғли',
+        //     'inventar_number' => 'f1',
+        //     'inventar' => '1',
+        //     'email' => 'f1wv5laf@gmail.com',
+        //     'login' => 'f1wv5laf@gmail.com',
+        //     'password' => bcrypt('f1wv5laf@gmail.com')
+        // ]);
+        // $userProfileData=[
+        //     'phone_number'=>  "997525612",
+        //     'organization_id'=>  1,
+        //     'branch_id'=>  1,
+        //     'department_id'=>  1,
+        //     'user_id'=>  $user->id,
+        // ];
+        // UserProfile::create($userProfileData);
+        
+        // // $role = Role::create(['name' => 'SuperAdmin']);
+        
+        // $permissions = Permission::pluck('id','id')->all();
+   
+        // $role->syncPermissions($permissions);
+     
+        // $user->assignRole([$role->id]);
+        
+        // $role = Role::create(['name' => 'Admin']);
+        // $role = Role::create(['name' => 'Manager']);
+        // $role = Role::create(['name' => 'Author']);
+        // $role = Role::create(['name' => 'Reader']);
+        // $role = Role::create(['name' => 'User']);
 
     }
 }

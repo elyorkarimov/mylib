@@ -19,16 +19,26 @@
 								<i class="mdi mdi-view-dashboard-outline"></i>
 								<span class="nav-text">{{ __('Dashboard') }}</span>
 							</a>
-							<hr>
 						</li>
 						@php
 						$roles=Auth::user()->getRoleNames()->toArray();
 						@endphp
 						@if (in_array("Reader", $roles))
 							@include('layouts.partials.rbac.reader')
+						@elseif (in_array("User", $roles))
+							@include('layouts.partials.rbac.user')
+						@elseif (in_array("SuperAdmin", $roles))
+							@include('layouts.partials.rbac.superadmin')
+						@elseif (in_array("Admin", $roles))
+							@include('layouts.partials.rbac.superadmin')
+						@elseif (in_array("Manager", $roles))
+							@include('layouts.partials.rbac.superadmin')
+						@elseif (in_array("Accountant", $roles))
+							@include('layouts.partials.rbac.accountant')
 						@else
-							@include('layouts.partials.rbac.superadmin')						
+							@include('layouts.partials.rbac.user')						
 						@endif
+						<hr>
 						<!-- Log out -->
 						<li>
 							<a class="sidenav-item-link" href="{{ route('logout', app()->getLocale()) }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">

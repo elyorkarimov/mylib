@@ -12,9 +12,7 @@ class CreateChairsTable extends Migration
      * @return void
      */
     public function up()
-    {
-         
-        
+    {  
         Schema::create('chairs', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('organization_id')->nullable();

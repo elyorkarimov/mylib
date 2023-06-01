@@ -17,9 +17,11 @@
         </div>
         <div>
             <a class="btn btn-success" href="{{ route('books.edit', [app()->getLocale(), $book->id]) }}"> {{ __('Edit') }}</a> | 
-
-
+            @if ($previous_page)
+                <a href="{{ $previous_page }}"  class="btn btn-primary" >{{ __('Back') }}</a>
+            @else
             <a href="{{ url(app()->getLocale() . '/admin/books') }}"  class="btn btn-primary" >{{ __('Back') }}</a>
+            @endif
         </div>
     </div>
      
@@ -29,10 +31,8 @@
                 <div class="card">
                     <div class="card-body">
                         @include('book.bookdetail', ['book'=>$book])
-
                         <hr>
-                        <livewire:admin.books.add-book-data :book_id="$book->id" />
-
+                        <livewire:admin.books.add-get-book-acts :book_id="$book->id" />
                     </div>
                 </div>
             </div>

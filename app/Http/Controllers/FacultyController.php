@@ -11,6 +11,27 @@ use Illuminate\Http\Request;
  */
 class FacultyController extends Controller
 {
+        /**
+     * create a new instance of the class
+     *
+     * @return void
+     */
+    function __construct()
+    {
+        $this->middleware(['role:SuperAdmin|Admin|Manager']);
+
+        // $this->middleware('permission:list|create|edit|delete|user-list|user-create|user-edit|user-delete', ['only' => ['index', 'store']]);
+        // $this->middleware('permission:create|user-create', ['only' => ['create', 'store']]);
+        // $this->middleware('permission:edit|user-edit', ['only' => ['edit', 'update']]);
+        // $this->middleware('permission:delete|user-delete', ['only' => ['destroy']]);
+        // $this->middleware('permission:deletedb', ['only' => ['destroyDB']]);
+        //  $this->middleware('permission:list|create|edit|delete', ['only' => ['index', 'store']]);
+        //  $this->middleware('permission:create', ['only' => ['create', 'store']]);
+        //  $this->middleware('permission:edit', ['only' => ['edit', 'update']]);
+        //  $this->middleware('permission:delete', ['only' => ['destroy']]);
+        //  $this->middleware('permission:deletedb', ['only' => ['destroyDB']]);
+
+    }
     /**
      * Display a listing of the resource.
      *
@@ -19,8 +40,8 @@ class FacultyController extends Controller
     public function index()
     {
         $perPage = 20;
-        $faculties = Faculty::orderBy('id', 'desc')->paginate($perPage);
-
+        $faculties = Faculty::with(['translations', 'organization', 'branch', 'organization.translations',  'branch.translations'])->withCount('profiles')->orderBy('id', 'desc')->paginate($perPage);
+        // withCount('books')
         return view('faculty.index', compact('faculties'))
             ->with('i', (request()->input('page', 1) - 1) * $faculties->perPage());
     }
@@ -135,5 +156,26 @@ class FacultyController extends Controller
         toast(__('Deleted successfully.'), 'info');
 
         return redirect()->route('faculties.index', app()->getLocale());
+    }
+      /**
+     * Write code on Method
+     *
+     * @return response()
+     */
+    public function delete($language, $id, Request $request)
+    {
+        $type=$request->input('type');
+
+        // BooksType::find($id)->delete();
+        $booksType= Faculty::find($id);
+        if($type=='DELETE'){
+            Faculty::find($id)->delete();
+            // $booksType->isActive=false;
+            // $booksType->Save();
+            toast(__('Deleted successfully.'), 'info');
+            return back();    
+        }else{
+            return view('book-types.show', compact('booksType'));
+        }
     }
 }

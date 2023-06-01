@@ -53,7 +53,7 @@
                                                         <div
                                                             class="woocommerce-LoopProduct-link woocommerce-loop-product__link d-block position-relative">
                                                             <div class="woocommerce-loop-product__thumbnail">
-                                                                <a href="{{ url(app()->getLocale() . '/books/' . $book->slug) }}"
+                                                                <a href="{{ url(app()->getLocale() . '/books/' . $book->id) }}"
                                                                     alt="{{ $book->dc_title }}"
                                                                     title="{{ $book->dc_title }}"
                                                                     class="d-block">
@@ -74,18 +74,18 @@
                                                                 class="woocommerce-loop-product__body product__body pt-3 bg-white">
                                                                 <div
                                                                     class="text-uppercase font-size-1 mb-1 text-truncate">
-                                                                    <a href="{{ url(app()->getLocale() . '/books/' . $book->slug) }}"
+                                                                    <a href="{{ url(app()->getLocale() . '/books/' . $book->id) }}"
                                                                         alt="{{ $book->dc_title }}"
                                                                         title="{{ $book->dc_title }}">{{ $book->booksType->title }}</a>
                                                                 </div>
                                                                 <h2
                                                                     class="woocommerce-loop-product__title product__title h6 text-lh-md mb-1 text-height-2 crop-text-2 h-dark">
-                                                                    <a href="{{ url(app()->getLocale() . '/books/' . $book->slug) }}"
+                                                                    <a href="{{ url(app()->getLocale() . '/books/' . $book->id) }}"
                                                                         alt="{{ $book->dc_title }}"
                                                                         title="{{ $book->dc_title }}">{{ $book->dc_title }}</a>
                                                                 </h2>
                                                                 <div class="font-size-2  mb-1 text-truncate">
-                                                                    <a href="{{ url(app()->getLocale() . '/books/' . $book->slug) }}"
+                                                                    <a href="{{ url(app()->getLocale() . '/books/' . $book->id) }}"
                                                                         alt="{{ $book->dc_title }}"
                                                                         title="{{ $book->dc_title }}"
                                                                         class="text-gray-700">
@@ -108,7 +108,7 @@
                                                                 </div>
                                                             </div>
                                                             <div class="product__hover d-flex align-items-center">
-                                                                @if ($book->dc_subjects)
+                                                                @if ($book->dc_subjects != "null" && $book->dc_subjects != null)
                                                                         @foreach (json_decode($book->dc_subjects) as $subject)
                                                                             {{-- <a href="{{ url(app()->getLocale() . '/authors/' . $author->slug) }}" class="text-gray-700"> --}}
                                                                             {{ $subject }},

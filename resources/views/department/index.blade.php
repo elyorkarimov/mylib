@@ -32,11 +32,10 @@
                                     <th>No</th>
                                     <th>{{ __('Organization') }}</th> 
                                     <th>{{ __('Branch') }}</th> 
-                                    
                                     <th>{{ __('Title') }}</th>
+                                    <th>{{ __('Number of books') }}</th>
+                                    <th>{{ __('Books in Copy') }}</th>
                                     <th>{{ __('IsActive') }}</th> 
-
-
                                     <th></th>
                                 </tr>
                             </thead>
@@ -45,11 +44,17 @@
                                     <tr>
                                         <td>{{ ++$i }}</td>
                                         <td>{!! $department->organization ? $department->organization->title:''!!}</td>
-                                        <td>{!! $department->Branch ? $department->Branch->title:''!!}</td>
+                                        <td>{!! $department->branch ? $department->branch->title:''!!}</td>
                                         
                                         <td>{{ $department->title }}</td>
+                                        <td>
+                                            {{ $department->book->count() }}
+                                        </td>
+                                        <td>
+                                            {{ $department->bookInventar->count() }}
+                                        </td>
                                         <td>{!! $department->isActive == 1 ? '<span class="badge badge-success"><i class="mdi mdi-check-circle"></i></span>' : '<span class="badge badge-danger"><i class="mdi mdi-close-circle "></i></span>' !!}</td>
-
+                                        
                                         <td>
                                             <form action="{{ route('departments.destroy',[app()->getLocale(), $department->id]) }}" method="POST">
                                                 <a class="btn btn-sm btn-primary " href="{{ route('departments.show', [app()->getLocale(), $department->id]) }}"> {{ __('Show') }}</a>
@@ -58,6 +63,17 @@
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-danger btn-sm">{{ __('Delete') }}</button>
                                             </form>
+                                            @if (Auth::user()->hasRole('SuperAdmin'))
+                                                <br>
+                                                <form method="POST"
+                                                    action="{{ route('departments.delete', [app()->getLocale(), 'id' => $department->id]) }}">
+                                                    @csrf
+                                                    <input name="type" type="hidden" value="DELETE">
+                                                    <button type="submit"
+                                                        class="btn btn-sm btn-danger btn-flat show_confirm"
+                                                        data-toggle="tooltip">{{ __('Delete from DataBase') }}</button>
+                                                </form>
+                                            @endif
                                         </td>
                                     </tr>
                                 @endforeach                                    

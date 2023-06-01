@@ -46,6 +46,7 @@
                             <th>{{ __('Branches') }}</th>
                             <th>{{ __('Departments') }}</th>
                             <th>{{ __('Inventar Number') }}</th>
+                            <th>{{ __('Bar code') }}</th>
                             <th>{{ __('Action') }}</th>
                         </tr>
                     </thead>
@@ -58,12 +59,19 @@
                                 <td>{!! $book_inventar->branch ? $book_inventar->branch->title : '' !!}</td>
                                 <td>{!! $book_inventar->department ? $book_inventar->department->title : '' !!}</td>
                                 <td class="text-center">
-                                    @php
-                                        $generator = new Picqer\Barcode\BarcodeGeneratorPNG();
-                                        echo '<img src="data:image/png;base64,' . base64_encode($generator->getBarcode($book_inventar->inventar_number, $generator::TYPE_CODE_128)) . '">';
-                                    @endphp
-                                    <br>
                                     {{ $book_inventar->inventar_number }}
+                                </td>
+                                <td class="text-center">
+                                    @if (env('APP_NAME')=='AKBT_TSUL')
+                                        {!! QrCode::size(100)->generate($book_inventar->bar_code); !!}
+                                    @else
+                                        @php
+                                            $generator = new Picqer\Barcode\BarcodeGeneratorPNG();
+                                            echo '<img src="data:image/png;base64,' . base64_encode($generator->getBarcode($book_inventar->bar_code, $generator::TYPE_CODE_128)) . '">';
+                                        @endphp
+                                    @endif
+                                    <br>
+                                    {{ $book_inventar->bar_code }}
                                 </td>
                                 <td>
                                     <a href="{{ route('books.inventar', [app()->getLocale(), $book_inventar->id]) }}"

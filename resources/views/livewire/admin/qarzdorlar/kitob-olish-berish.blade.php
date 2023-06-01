@@ -93,6 +93,10 @@
                                                     {!! $userProfile->userType ? $userProfile->userType->title : '' !!}
                                                 </div>
                                                 <div class="form-group">
+                                                    <strong>{{ __('Organization') }}:</strong>
+                                                    {!! $userProfile->organization ? $userProfile->organization->title : '' !!}
+                                                </div>
+                                                <div class="form-group">
                                                     <strong>{{ __('Branch') }}:</strong>
                                                     {!! $userProfile->branch ? $userProfile->branch->title : '' !!}
                                                 </div>
@@ -157,35 +161,48 @@
                                                                                 </thead>
 
                                                                                 <tbody>
+
                                                                                     @foreach ($debtors as $key => $item)
-                                                                                    @php
-                                                                                        $today = date('Y-m-d');
-                                                                                        // echo $item->return_time;
-                                                                                        // $qaytarish_vaqti = strtotime($item->return_time . '- ' . $item->how_many_days . ' days');
-                                                                                        // returned time kkmas
-                                                                                        $date1 = date_create($item->today);
-                                                                                        $date2 = date_create($item->return_time);
-                                                                                        $diff = date_diff($date1, $date2);
-                                                                                        $day_diff=$diff->format("%R%a");                                                                                   
-                                                                                    @endphp
+                                                                                     
+                                                                                        @if ($item->book_id)
+                                                                                            
+                                                                                            @php
+                                                                                                $today = date('Y-m-d');
+                                                                                                // echo $item->return_time;
+                                                                                                // $qaytarish_vaqti = strtotime($item->return_time . '- ' . $item->how_many_days . ' days');
+                                                                                                // returned time kkmas
+                                                                                                $date1 = date_create($item->today);
+                                                                                                $date2 = date_create($item->return_time);
+                                                                                                $diff = date_diff($date1, $date2);
+                                                                                                $day_diff=$diff->format("%R%a");                                                                                   
+                                                                                            @endphp
                                                                                         <tr @if ($day_diff<1) class="alert alert-danger" @else class="alert alert-primary" @endif
                                                                                             wire:key="{{ Str::random(30) }}">
                                                                                             <td>
-
-                                                                                                {{ $item->book->dc_title }}
+                                                                                                @if ($item->book)
+                                                                                                    {{ $item->book->dc_title }}
+                                                                                                @endif
                                                                                             </td>
                                                                                             <td>
-                                                                                                @foreach (json_decode($item->book->dc_authors) as $k => $value)
-                                                                                                    {!! $value . ',<br>' !!}
-                                                                                                @endforeach
+                                                                                                @if ($item->book)
+                                                                                                    @foreach (json_decode($item->book->dc_authors) as $k => $value)
+                                                                                                        {!! $value . ',<br>' !!}
+                                                                                                    @endforeach
+                                                                                                @endif
                                                                                             </td>
                                                                                             <td class="text-center">
-                                                                                                @php
-                                                                                                    $generator = new Picqer\Barcode\BarcodeGeneratorPNG();
-                                                                                                    echo '<img src="data:image/png;base64,' . base64_encode($generator->getBarcode($item->bookInventar->inventar_number, $generator::TYPE_CODE_128)) . '">';
-                                                                                                @endphp
-                                                                                                <br>
-                                                                                                {{ $item->bookInventar->inventar_number }}
+                                                                                                    @if ($item->bookInventar != null)
+                                                                                                        @if (env('APP_NAME')=='AKBT_TSUL')
+                                                                                                            {!! QrCode::size(100)->generate($item->bookInventar->bar_code); !!}
+                                                                                                        @else
+                                                                                                            @php
+                                                                                                                $generator = new Picqer\Barcode\BarcodeGeneratorPNG();
+                                                                                                                echo '<img src="data:image/png;base64,' . base64_encode($generator->getBarcode($item->bookInventar->bar_code, $generator::TYPE_CODE_128)) . '">';
+                                                                                                            @endphp
+                                                                                                        @endif
+                                                                                                        <br>
+                                                                                                        {{ $item->bookInventar->bar_code }}                                                         
+                                                                                                    @endif
                                                                                             </td>
                                                                                             <td class="text-center">
                                                                                                 
@@ -213,6 +230,8 @@
                                                                                                 </button>
                                                                                             </td>
                                                                                         </tr>
+                                                                                        @endif
+
                                                                                     @endforeach
                                                                                     <tr>
                                                                                         <td colspan="5">
@@ -255,7 +274,9 @@
                                                                             </thead>
 
                                                                             <tbody>
+                                                                               
                                                                                 @foreach ($items as $key => $item)
+                                                                                 
                                                                                     <tr
                                                                                         wire:key="{{ Str::random(30) }}">
                                                                                         <td>
@@ -268,10 +289,15 @@
                                                                                             @endforeach
                                                                                         </td>
                                                                                         <td class="text-center">
-                                                                                            @php
-                                                                                                $generator = new Picqer\Barcode\BarcodeGeneratorPNG();
-                                                                                                echo '<img src="data:image/png;base64,' . base64_encode($generator->getBarcode($item['attributes']['gtin'], $generator::TYPE_CODE_128)) . '">';
-                                                                                            @endphp
+                                                                                            
+                                                                                            @if (env('APP_NAME')=='AKBT_TSUL')
+                                                                                                {!! QrCode::size(100)->generate($item['attributes']['gtin']); !!}
+                                                                                            @else
+                                                                                                @php
+                                                                                                    $generator = new Picqer\Barcode\BarcodeGeneratorPNG();
+                                                                                                    echo '<img src="data:image/png;base64,' . base64_encode($generator->getBarcode($item['attributes']['gtin'], $generator::TYPE_CODE_128)) . '">';
+                                                                                                @endphp
+                                                                                            @endif
                                                                                             <br>
                                                                                             {{ $item['attributes']['gtin'] }}
                                                                                         </td>

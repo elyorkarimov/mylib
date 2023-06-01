@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ExportBooksType;
 use App\Models\BooksType;
 use Illuminate\Http\Request;
 use RealRashid\SweetAlert\Facades\Alert;
+use Maatwebsite\Excel\Facades\Excel;
 
 
 /**
@@ -13,18 +15,56 @@ use RealRashid\SweetAlert\Facades\Alert;
  */
 class BooksTypeController extends Controller
 {
+        /**
+     * create a new instance of the class
+     *
+     * @return void
+     */
+    function __construct()
+    {
+        $this->middleware(['role:SuperAdmin|Admin|Manager']);
+
+        // $this->middleware('permission:list|create|edit|delete|user-list|user-create|user-edit|user-delete', ['only' => ['index', 'store']]);
+        // $this->middleware('permission:create|user-create', ['only' => ['create', 'store']]);
+        // $this->middleware('permission:edit|user-edit', ['only' => ['edit', 'update']]);
+        // $this->middleware('permission:delete|user-delete', ['only' => ['destroy']]);
+        // $this->middleware('permission:deletedb', ['only' => ['destroyDB']]);
+        //  $this->middleware('permission:list|create|edit|delete', ['only' => ['index', 'store']]);
+        //  $this->middleware('permission:create', ['only' => ['create', 'store']]);
+        //  $this->middleware('permission:edit', ['only' => ['edit', 'update']]);
+        //  $this->middleware('permission:delete', ['only' => ['destroy']]);
+        //  $this->middleware('permission:deletedb', ['only' => ['destroyDB']]);
+
+    }
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index($language, Request $request)
     {
+        $keyword=trim($request->get('keyword'));
+        $q = BooksType::query();
         $perPage = 20;
-        $booksTypes = BooksType::orderBy('id', 'desc')->paginate($perPage);
+        if($keyword != null){ 
+            $q->whereHas('translations', function ($query) use ($keyword) {
+                if($keyword) {
+                    $query->where('title', 'like', '%'.$keyword.'%');
+                }
+            }); 
+        }
+        
+        $booksTypes = $q->with('translations')->withCount(['books', 'journals'])->paginate($perPage);
 
-        return view('books-type.index', compact('booksTypes'))
+        return view('book-types.index', compact('booksTypes', 'keyword'))
             ->with('i', (request()->input('page', 1) - 1) * $booksTypes->perPage());
+    }
+
+    public function export($language, Request $request){
+        $file_name = 'books-type_'.date('Y_m_d_H_i_s').'.xlsx';
+        $keyword=trim($request->get('keyword'));
+
+        return Excel::download(new ExportBooksType($keyword), $file_name);
     }
 
     /**
@@ -35,7 +75,7 @@ class BooksTypeController extends Controller
     public function create()
     {
         $booksType = new BooksType();
-        return view('books-type.create', compact('booksType'));
+        return view('book-types.create', compact('booksType'));
     }
 
     /**
@@ -64,7 +104,7 @@ class BooksTypeController extends Controller
 
         toast(__('Created successfully.'), 'success');
 
-        return redirect()->route('books-types.index', app()->getLocale());
+        return redirect()->route('book-types.index', app()->getLocale());
     }
 
     /**
@@ -77,7 +117,7 @@ class BooksTypeController extends Controller
     {
         $booksType = BooksType::find($id);
 
-        return view('books-type.show', compact('booksType'));
+        return view('book-types.show', compact('booksType'));
     }
 
     /**
@@ -90,19 +130,18 @@ class BooksTypeController extends Controller
     {
         $booksType = BooksType::find($id);
 
-        return view('books-type.edit', compact('booksType'));
+        return view('book-types.edit', compact('booksType'));
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request $request
-     * @param  BooksType $booksType
+     * @param  BooksType $bookType
      * @return \Illuminate\Http\Response
      */
-    public function update($language, Request $request, BooksType $booksType)
+    public function update($language, Request $request, BooksType $bookType)
     {
-
         request()->validate(
             BooksType::rules(),
             [
@@ -114,11 +153,10 @@ class BooksTypeController extends Controller
                 'title_uz' => __('Title UZ'),
             ]
         );
-
-        $booksType->update(BooksType::GetData($request, $booksType));
+        $bookType->update(BooksType::GetData($request, $bookType));
         toast(__('Updated successfully.'), 'success');
 
-        return redirect()->route('books-types.index', app()->getLocale());
+        return redirect()->route('book-types.index', app()->getLocale());
     }
 
     /**
@@ -126,8 +164,8 @@ class BooksTypeController extends Controller
      * @return \Illuminate\Http\RedirectResponse
      * @throws \Exception
      */
-    public function destroy($language, $id)
-    {
+    public function destroy($language, $id, Request $request)
+    { 
         $booksType = BooksType::find($id);
         $booksType->isActive = false;
         $booksType->Save();
@@ -137,7 +175,7 @@ class BooksTypeController extends Controller
         // ->delete()
         toast(__('Deleted successfully.'), 'info');
 
-        return redirect()->route('books-types.index', app()->getLocale());
+        return redirect()->route('book-types.index', app()->getLocale());
     }
 
     /**
@@ -145,14 +183,20 @@ class BooksTypeController extends Controller
      *
      * @return response()
      */
-    public function delete($language, $id)
+    public function delete($language, $id, Request $request)
     {
+        $type=$request->input('type');
 
         // BooksType::find($id)->delete();
-       $booksType= BooksType::find($id);
-        $booksType->isActive=false;
-        $booksType->Save();
-        toast(__('Deleted successfully.'), 'info');
-        return back();
+        $booksType= BooksType::find($id);
+        if($type=='DELETE'){
+            BooksType::find($id)->delete();
+            // $booksType->isActive=false;
+            // $booksType->Save();
+            toast(__('Deleted successfully.'), 'info');
+            return back();    
+        }else{
+            return view('book-types.show', compact('booksType'));
+        }
     }
 }

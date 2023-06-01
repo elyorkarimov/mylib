@@ -30,32 +30,71 @@
                             <thead class="thead">
                                 <tr>
                                     <th>No</th>
-                                    
-										<th>Order Date</th>
-										<th>Order Number</th>
-										<th>Type</th>
-										<th>Status</th>
-										<th>Reader Id</th>
-
-
+                                        <th>{{ __('Order Number') }}</th>
+                                        <th>{{ __('Order Date') }}</th>
+										<th>{{ __('Status') }}</th>
+										<th>{{ __('Reader') }}</th>
                                     <th></th>
                                 </tr>
                             </thead>
-                            <tbody>
-                            @foreach ($orders as $order)
+                            <tbody> 
+                                <form action="{{ route('orders.index', app()->getLocale()) }}" method="GET" accept-charset="UTF-8"
+                                    role="search">
+                                <tr> 
+                                    <th>No</th>                                    
+                                    <th>
+                                        <div class="form-group">
+                                            <input type="text" class="form-control " name="order_number"
+                                                id="order_number" value="{{ $order_number }}"
+                                                placeholder="{{ __('Order Number') }}" />
+                                        </div>
+                                    </th>
+                                    <th>
+                                        <div class="form-group">
+                                            <input type="date" class="form-control " name="order_date"
+                                            id="order_date" value="{{ $order_date }}"
+                                            placeholder="{{ __('Order Date') }}" />
+                                        </div>
+                                    </th>
+                                    <th>
+                                        <div class="form-group">
+                                            <select name="status" class="border shadow p-2 bg-white">
+                                                <option value=''>{{ __('Choose') }}</option>
+                                                <option value=0 {!! ($status==0)?'selected':'' !!} >{{ __("DELETED") }}</option>
+                                                <option value=1 {!! ($status==1)?'selected':'' !!}>{{ __("SENT") }}</option>
+                                                <option value=2 {!! ($status==2)?'selected':'' !!}>{{__("ACCEPTED") }}</option>
+                                                <option value=3 {!! ($status==3)?'selected':'' !!}>{{__("READY") }}</option>
+                                                <option value=4 {!! ($status==4)?'selected':'' !!}>{{ __("TAKEN_BY_READER") }}</option>
+                                            </select>
+                                        </div>
+                                    </th>
+                                    <th></th>
+                                    <th width="280px">
+                                        <div class="input-group">
+                                            <a href="{{ route('orders.index', app()->getLocale()) }}"
+                                                class="btn btn-sm btn-info">{{ __('Clear') }}</a>
+                                            <button type="submit"
+                                                class="btn btn-sm btn-primary float-right">{{ __('Search') }}</button>
+                                        </div>
+                                    </th>
+                                </tr>
+                                </form>
+                                @foreach ($orders as $order)
                                     <tr>
                                         <td>{{ ++$i }}</td>
-                                        
+                                            <td>{{ $order->order_number }}</td>
 											<td>{{ $order->order_date }}</td>
-											<td>{{ $order->order_number }}</td>
-											<td>{{ $order->type }}</td>
-											<td>{{ $order->status }}</td>
-											<td>{{ $order->reader_id }}</td>
-
+											<td>{!! App\Models\Order::GetStatus($order->status) !!}</td>
+											<td>
+                                                {!! $order->reader ? $order->reader->name : '' !!}
+                                                <br>
+                                                <b>{{ __('Email') }}</b>: <a href="mailTo:{!! $order->reader ? $order->reader->email : '' !!}">{!! $order->reader ? $order->reader->email : '' !!}</a>
+                                                <br>
+                                                <b>{{ __('Phone Number') }}: </b><a href="tel:{!! $order->reader ? $order->reader->profile->phone_number : '' !!}">{!! $order->reader ? $order->reader->profile->phone_number : '' !!}</a>                                            
+                                            </td>
                                         <td>
                                             <form action="{{ route('orders.destroy',[app()->getLocale(), $order->id]) }}" method="POST">
                                                 <a class="btn btn-sm btn-primary " href="{{ route('orders.show', [app()->getLocale(), $order->id]) }}"> {{ __('Show') }}</a>
-                                                <a class="btn btn-sm btn-success" href="{{ route('orders.edit', [app()->getLocale(), $order->id]) }}"> {{ __('Edit') }}</a>
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-danger btn-sm">{{ __('Delete') }}</button>

@@ -11,6 +11,27 @@ use Illuminate\Http\Request;
  */
 class ReferenceGenderController extends Controller
 {
+        /**
+     * create a new instance of the class
+     *
+     * @return void
+     */
+    function __construct()
+    {
+        $this->middleware(['role:SuperAdmin|Admin|Manager']);
+
+        // $this->middleware('permission:list|create|edit|delete|user-list|user-create|user-edit|user-delete', ['only' => ['index', 'store']]);
+        // $this->middleware('permission:create|user-create', ['only' => ['create', 'store']]);
+        // $this->middleware('permission:edit|user-edit', ['only' => ['edit', 'update']]);
+        // $this->middleware('permission:delete|user-delete', ['only' => ['destroy']]);
+        // $this->middleware('permission:deletedb', ['only' => ['destroyDB']]);
+        //  $this->middleware('permission:list|create|edit|delete', ['only' => ['index', 'store']]);
+        //  $this->middleware('permission:create', ['only' => ['create', 'store']]);
+        //  $this->middleware('permission:edit', ['only' => ['edit', 'update']]);
+        //  $this->middleware('permission:delete', ['only' => ['destroy']]);
+        //  $this->middleware('permission:deletedb', ['only' => ['destroyDB']]);
+
+    }
     /**
      * Display a listing of the resource.
      *
@@ -19,8 +40,8 @@ class ReferenceGenderController extends Controller
     public function index()
     {
         $perPage = 20;
-        $referenceGenders = ReferenceGender::orderBy('id', 'desc')->paginate($perPage);
-
+        $referenceGenders = ReferenceGender::with('translations')->withCount('users')->orderBy('id', 'desc')->paginate($perPage);
+ 
         return view('reference-gender.index', compact('referenceGenders'))
             ->with('i', (request()->input('page', 1) - 1) * $referenceGenders->perPage());
     }

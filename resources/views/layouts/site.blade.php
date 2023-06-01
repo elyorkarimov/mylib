@@ -24,7 +24,7 @@
     <link href="{{ asset('front/assets/vendor/slick-carousel/slick/slick.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('front/assets/vendor/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.css') }}"
         rel="stylesheet" type="text/css" />
-
+     
     <!-- CSS Bookworm Template -->
     <link href="{{ asset('front/assets/css/theme.css') }}" rel="stylesheet" type="text/css" />
     @livewireStyles
@@ -40,8 +40,13 @@
                     <ul class="topbar__nav--left nav ml-md-n3">
                         <li class="nav-item"><a href="#" class="nav-link link-black-100"><i
                                     class="glph-icon flaticon-question mr-2"></i>Sizga yordam bera olamizmi?</a></li>
-                        <li class="nav-item"><a href="tel:+998993851882" class="nav-link link-black-100"><i
-                                    class="glph-icon flaticon-phone mr-2"></i>+99899 385-18-82</a></li>
+                        <li class="nav-item"><a href="tel:+998977120993" class="nav-link link-black-100"><i
+                                    class="glph-icon flaticon-phone mr-2"></i>+998 97 712 09 93</a></li>
+                        <li class="nav-item">
+                            
+                                        <a class="nav-link link-black-100" href="https://telegram.me/tdau_news" target="__blank">
+                                        <span class="fab fa-telegram"> Telegram</span>
+                                </a></li>
                     </ul>
 
                     <ul class="topbar__nav--right nav mr-md-n3">
@@ -62,54 +67,19 @@
                             @endauth
 
                         @endif
-
-                        {{-- <li class="nav-item"><a href="#" class="nav-link link-black-100"><i class="glph-icon flaticon-switch"></i></a></li>
-                        <li class="nav-item"><a href="#" class="nav-link link-black-100"><i class="glph-icon flaticon-heart"></i></a></li> --}}
-                        {{-- <li class="nav-item">
-                            <!-- Account Sidebar Toggle Button -->
-                            <a id="sidebarNavToggler" href="javascript:;" role="button" class="nav-link link-black-100"
-                                aria-controls="sidebarContent"
-                                aria-haspopup="true"
-                                aria-expanded="false"
-                                data-unfold-event="click"
-                                data-unfold-hide-on-scroll="false"
-                                data-unfold-target="#sidebarContent"
-                                data-unfold-type="css-animation"
-                                data-unfold-overlay='{
-                                    "className": "u-sidebar-bg-overlay",
-                                    "background": "rgba(0, 0, 0, .7)",
-                                    "animationSpeed": 500
-                                }'
-                                data-unfold-animation-in="fadeInRight"
-                                data-unfold-animation-out="fadeOutRight"
-                                data-unfold-duration="500">
-                                <i class="glph-icon flaticon-user"></i>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                {{ config('app.locales')[App::getLocale()] }}
                             </a>
-                            <!-- End Account Sidebar Toggle Button -->
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                            @foreach (config('app.locales') as $lang => $language)
+                                @if ($lang != App::getLocale())
+                                        <a class="dropdown-item" href="{{ route('lang.switch', $lang) }}"> {{$language}}</a>
+                                @endif
+                            @endforeach
+                            </div>
                         </li>
-                        <li class="nav-item">
-                            <!-- Cart Sidebar Toggle Button -->
-                            <a id="sidebarNavToggler1" href="javascript:;" role="button" class="nav-link link-black-100 position-relative"
-                                aria-controls="sidebarContent1"
-                                aria-haspopup="true"
-                                aria-expanded="false"
-                                data-unfold-event="click"
-                                data-unfold-hide-on-scroll="false"
-                                data-unfold-target="#sidebarContent1"
-                                data-unfold-type="css-animation"
-                                data-unfold-overlay='{
-                                    "className": "u-sidebar-bg-overlay",
-                                    "background": "rgba(0, 0, 0, .7)",
-                                    "animationSpeed": 500
-                                }'
-                                data-unfold-animation-in="fadeInRight"
-                                data-unfold-animation-out="fadeOutRight"
-                                data-unfold-duration="500">
-                                <span class="position-absolute bg-dark width-16 height-16 rounded-circle d-flex align-items-center justify-content-center text-white font-size-n9 right-0">3</span>
-                                <i class="glph-icon flaticon-icon-126515"></i>
-                            </a>
-                            <!-- End Cart Sidebar Toggle Button -->
-                        </li> --}}
+                         
                     </ul>
 
                 </div>
@@ -143,7 +113,7 @@
                     </div>
                     <div class="site-branding pr-md-4">
                         <a href="/" class="d-block mb-1">
-                            <img src="/logo.png" alt="" style="width: 120px;">
+                            <img src="/logo.png" alt="" style="width: 200px;">
                         </a>
                     </div>
                     <div class="site-navigation mr-auto d-none d-xl-block">
@@ -156,14 +126,9 @@
                                     data-unfold-duration="200" data-unfold-delay="50"
                                     data-unfold-hide-on-scroll="true" data-unfold-animation-in="slideInUp"
                                     data-unfold-animation-out="fadeOut">
-                                    Home
+                                    {{__('Home')}}
                                 </a>
-                                <ul id="homeDropdownMenu"
-                                    class="dropdown-unfold dropdown-menu font-size-2 rounded-0 border-gray-900"
-                                    aria-labelledby="homeDropdownInvoker">
-                                    <li><a href="/" class="dropdown-item link-black-100">Home v1</a></li>
-
-                                </ul>
+                                
                             </li>
                             <li class="nav-item">
                                 <a  href="{{ url(app()->getLocale() . '/udcs/') }}" class=" nav-link link-black-100 mx-4 px-0 py-5 font-weight-medium d-flex align-items-center"
@@ -174,7 +139,6 @@
                                     data-unfold-animation-out="fadeOut">
                                     {{ __('Udc') }}
                                 </a>
-                                 
                             </li>
                         </ul>
                     </div>
@@ -197,6 +161,18 @@
                                 <i class="glph-icon flaticon-user"></i>
                             </a>
                             <!-- End Account Sidebar Toggle Button - Mobile -->
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                {{ config('app.locales')[App::getLocale()] }}
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                            @foreach (config('app.locales') as $lang => $language)
+                                @if ($lang != App::getLocale())
+                                        <a class="dropdown-item" href="{{ route('lang.switch', $lang) }}"> {{$language}}</a>
+                                @endif
+                            @endforeach
+                            </div>
                         </li>
                     </ul>
                     <div class="site-search ml-xl-0 ml-md-auto w-r-100 my-2 my-xl-0">
@@ -233,149 +209,58 @@
                         <div class="col-lg-4 mb-6 mb-lg-0">
                             <div class="pb-6">
                                 <a href="index.html" class="d-inline-block mb-5">
-
                                     <img src="/logo.png" alt="" style="width: 120px;">
-
                                 </a>
                                 <address class="font-size-2 mb-5">
                                     <span class="mb-2 font-weight-normal text-dark">
-                                        Toshkent sh. Navoiy ko’chasi, 32 uy, 100011 <br> Toshkent
+                                        Toshkent vil. Universitet ko'chasi, 2 uy <br> Toshkent
                                     </span>
                                 </address>
                                 <div class="mb-4">
-                                    <a href="mailto:karimovelyor@gmail.com"
-                                        class="font-size-2 d-block link-black-100 mb-1">karimovelyor@gmail.com</a>
-                                    <a href="tel:+998993851882" class="font-size-2 d-block link-black-100">+99899
-                                        385-18-82</a>
+                                    <a href="mailto:arm@tdau.uz"
+                                        class="font-size-2 d-block link-black-100 mb-1">arm@tdau.uz</a>
+                                    <a href="tel:+998977120993" class="font-size-2 d-block link-black-100">+998 97 712 09 93</a>
                                 </div>
                                 <ul class="list-unstyled mb-0 d-flex">
                                     <li class="btn pl-0">
-                                        <a class="link-black-100" href="#">
+                                        <a class="link-black-100" href="https://www.instagram.com/tashdau/" target="__blank">
                                             <span class="fab fa-instagram"></span>
                                         </a>
                                     </li>
                                     <li class="btn">
-                                        <a class="link-black-100" href="#">
+                                        <a class="link-black-100" href="https://www.facebook.com/tashdau" target="__blank">
                                             <span class="fab fa-facebook-f"></span>
                                         </a>
                                     </li>
                                     <li class="btn">
-                                        <a class="link-black-100" href="#">
+                                        <a class="link-black-100" href="https://www.youtube.com/channel/UCUPWA0kMxIeyk5wA-3WMkug" target="__blank">
                                             <span class="fab fa-youtube"></span>
                                         </a>
                                     </li>
                                     <li class="btn">
-                                        <a class="link-black-100" href="#">
+                                        <a class="link-black-100" href="https://twitter.com/tashdau" target="__blank">
                                             <span class="fab fa-twitter"></span>
                                         </a>
                                     </li>
                                     <li class="btn">
-                                        <a class="link-black-100" href="#">
-                                            <span class="fab fa-pinterest"></span>
+                                        <a class="link-black-100" href="https://telegram.me/tdau_news" target="__blank">
+                                            <span class="fab fa-telegram"></span>
                                         </a>
                                     </li>
                                 </ul>
                             </div>
                         </div>
                         <div class="col-lg-2 mb-6 mb-lg-0">
-                            <h4 class="font-size-3 font-weight-medium mb-2 mb-xl-5 pb-xl-1">Explore</h4>
-                            <ul class="list-unstyled mb-0">
-                                <li class="pb-2">
-                                    <a class="widgets-hover transition-3d-hover font-size-2 link-black-100"
-                                        href="#">About as</a>
-                                </li>
-                                <li class="py-2">
-                                    <a class="widgets-hover transition-3d-hover font-size-2 link-black-100"
-                                        href="#">Sitemap</a>
-                                </li>
-                                <li class="py-2">
-                                    <a class="widgets-hover transition-3d-hover font-size-2 link-black-100"
-                                        href="#">Bookmarks</a>
-                                </li>
-                                <li class="pt-2">
-                                    <a class="widgets-hover transition-3d-hover font-size-2 link-black-100"
-                                        href="#">Sign in/Join</a>
-                                </li>
-                            </ul>
+                             
                         </div>
                         <div class="col-lg-2 mb-6 mb-lg-0">
-                            <h4 class="font-size-3 font-weight-medium mb-2 mb-xl-5 pb-xl-1">Customer Service</h4>
-                            <ul class="list-unstyled mb-0">
-                                <li class="pb-2">
-                                    <a class="widgets-hover transition-3d-hover font-size-2 link-black-100"
-                                        href="#">Help Center</a>
-                                </li>
-                                <li class="py-2">
-                                    <a class="widgets-hover transition-3d-hover font-size-2 link-black-100"
-                                        href="#">Returns</a>
-                                </li>
-                                <li class="py-2">
-                                    <a class="widgets-hover transition-3d-hover font-size-2 link-black-100"
-                                        href="#">Product Recalls</a>
-                                </li>
-                                <li class="py-2">
-                                    <a class="widgets-hover transition-3d-hover font-size-2 link-black-100"
-                                        href="#">Accessibility</a>
-                                </li>
-                                <li class="py-2">
-                                    <a class="widgets-hover transition-3d-hover font-size-2 link-black-100"
-                                        href="#">Contact Us</a>
-                                </li>
-                                <li class="pt-2">
-                                    <a class="widgets-hover transition-3d-hover font-size-2 link-black-100"
-                                        href="#">Store Pickup</a>
-                                </li>
-                            </ul>
+                             
                         </div>
                         <div class="col-lg-2 mb-6 mb-lg-0">
-                            <h4 class="font-size-3 font-weight-medium mb-2 mb-xl-5 pb-xl-1">Policy</h4>
-                            <ul class="list-unstyled mb-0">
-                                <li class="pb-2">
-                                    <a class="widgets-hover transition-3d-hover font-size-2 link-black-100"
-                                        href="#">Return Policy</a>
-                                </li>
-                                <li class="py-2">
-                                    <a class="widgets-hover transition-3d-hover font-size-2 link-black-100"
-                                        href="#">Terms Of Use</a>
-                                </li>
-                                <li class="py-2">
-                                    <a class="widgets-hover transition-3d-hover font-size-2 link-black-100"
-                                        href="#">Security</a>
-                                </li>
-                                <li class="pt-2">
-                                    <a class="widgets-hover transition-3d-hover font-size-2 link-black-100"
-                                        href="#">Privacy</a>
-                                </li>
-                            </ul>
+                             
                         </div>
                         <div class="col-lg-2 mb-6 mb-lg-0">
-                            <h4 class="font-size-3 font-weight-medium mb-2 mb-xl-5 pb-xl-1">Categories</h4>
-                            <ul class="list-unstyled mb-0">
-                                <li class="pb-2">
-                                    <a class="widgets-hover transition-3d-hover font-size-2 link-black-100"
-                                        href="#">Action</a>
-                                </li>
-                                <li class="py-2">
-                                    <a class="widgets-hover transition-3d-hover font-size-2 link-black-100"
-                                        href="#">Comedy</a>
-                                </li>
-                                <li class="py-2">
-                                    <a class="widgets-hover transition-3d-hover font-size-2 link-black-100"
-                                        href="#">Drama</a>
-                                </li>
-                                <li class="py-2">
-                                    <a class="widgets-hover transition-3d-hover font-size-2 link-black-100"
-                                        href="#">Horror</a>
-                                </li>
-                                <li class="py-2">
-                                    <a class="widgets-hover transition-3d-hover font-size-2 link-black-100"
-                                        href="#">Kids</a>
-                                </li>
-                                <li class="pt-2">
-                                    <a class="widgets-hover transition-3d-hover font-size-2 link-black-100"
-                                        href="#">Romantic Comedy</a>
-                                </li>
-                            </ul>
+                            
                         </div>
                     </div>
                 </div>

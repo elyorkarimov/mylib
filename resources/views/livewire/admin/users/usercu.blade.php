@@ -136,7 +136,7 @@
                                 <select id="gender_id"
                                     class=" form-select form-control {{ $errors->has('gender_id') ? ' is-invalid' : '' }}"
                                     wire:model="gender_id">
-                                    <option value="0">{{ __('Choose') }}</option>
+                                    <option value="null">{{ __('Choose') }}</option>
                                     @foreach ($genders as $k => $v)
                                         <option value="{{ $k }}">{{ $v }}</option>
                                     @endforeach
@@ -162,7 +162,7 @@
                                 <select id="userType_id"
                                     class=" form-select form-control {{ $errors->has('userType_id') ? ' is-invalid' : '' }}"
                                     wire:model="userType_id">
-                                    <option value="0">{{ __('Choose') }}</option>
+                                    <option value="null">{{ __('Choose') }}</option>
                                     @foreach ($userTypes as $k => $v)
                                         <option value="{{ $k }}">{{ $v }}</option>
                                     @endforeach

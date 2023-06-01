@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Jobs\MarcImportProcess;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Scriptotek\Marc\Collection;
+use Scriptotek\Marc\Marc21;
+use Scriptotek\Marc\Record;
 
 /**
  * Class Import
@@ -19,6 +22,7 @@ use Scriptotek\Marc\Collection;
  * @property $published_city
  * @property $published_year
  * @property $ISBN
+ * @property $uk
  * @property $description
  * @property $published_date
  * @property $authors_mark
@@ -44,15 +48,12 @@ class Import extends Model
 {
 
 
-
-
     /**
      * Attributes that should be mass-assignable.
      *
      * @var array
      */
-    protected $fillable = ['title', 'authors', 'UDK', 'BBK', 'publisher', 'published_city', 'published_year', 'ISBN', 'description', 'published_date', 'authors_mark', 'from_what_system', 'betlar_soni', 'price', 'status', 'extra1', 'extra2', 'extra3', 'extra4', 'created_by', 'updated_by'];
-
+    protected $fillable = ['title', 'authors', 'UDK', 'BBK', 'publisher', 'published_city', 'published_year', 'ISBN', 'description', 'published_date', 'authors_mark', 'from_what_system', 'betlar_soni', 'price', 'status', 'extra1', 'extra2', 'extra3', 'extra4', 'created_by', 'updated_by', 'full_text_path', 'file_format', 'file_format_type', 'file_size', 'uk', 'book_lang', 'books_type', 'books_text_type'];
 
 
     /**
@@ -91,83 +92,188 @@ class Import extends Model
             $model->updated_by = Auth::id();
         });
     }
+    public function change_str_with_alphabet($str)
+    {
+        $returnStr = str_replace('&#1202;', 'Ҳ', $str);
+        $returnStr = str_replace('&#1203;', 'ҳ', $returnStr);
+        $returnStr = str_replace('&#1178;', 'Қ', $returnStr);
+        $returnStr = str_replace('&#1179;', 'қ', $returnStr);
+        $returnStr = str_replace('&#1170;', 'Ғ', $returnStr);
+        $returnStr = str_replace('&#1171;', 'ғ', $returnStr);
+        $returnStr = str_replace('&#1171;', 'ғ', $returnStr);
+        $returnStr = str_replace("\'", "'", $returnStr);
+        return $returnStr;
+    }
+    public static function converting($string)
+    {
 
-    public static function converting($string){
         $charset = mb_detect_encoding($string);
         // dd($charset);
-        if($charset=='ASCII'){
+        if ($charset == 'ASCII') {
             // return $string;
-            return mb_convert_encoding($string, "ASCII", "windows-1251");
-        }else{
-            return mb_convert_encoding($string, "utf-8", "windows-1251");
+            return self::change_str_with_alphabet(mb_convert_encoding($string, "ASCII", "windows-1251"));
+        } else {
+            return self::change_str_with_alphabet(mb_convert_encoding($string, "utf-8", "windows-1251"));
         }
         // return $string;
+
+    }
+
+    public static function get100A_1_($rec)
+    {
+        $content = explode('', strstr($rec, '100^a'));
+        $new = '';
+        if ($content != null) {
+            $c = explode('^', $content[0]);
+            dd($rec->type);
+            $newArr = explode(' ', $c[2]);
+            $new = ' / ' . $newArr[1] . ' ' . $newArr[2] . ' ' . $newArr[0];
+        }
+        return $new;
+    }
+
+    public static function importData($res, $type)
+    {
+        $data = [];
+
+        $data['price'] = 0;
+        $data['status'] = 1;
+        $data['published_year']=null;
+        $data['title']=null;
+        $data['published_city']=null;
+        $data['publisher']=null;
+
+ 
+
+        if (isset($res['20'])) {
+            if (isset($res['20']['c'])) {
+                $data['price'] = $res['20']['c'];
+            }
+            if (isset($res['20']['a'])) {
+                $data['ISBN'] = $res['20']['a'];
+            }
+        }
+
+        if (isset($res['40'])) {
+            if (isset($res['40']['b'])) {
+                $data['price'] = $res['40']['b'];
+            }
+
+        }
+        // if (isset($res['675']) && isset($res['675']['3'])) {
+        //     $UDK = substr(Import::converting($res['675'][3][0]), 1);
+        //     $data['UDK'] = $UDK;
+        // }
+
+        if (isset($res['90'])) {
+            if (isset($res['90']['x'])) {
+                $data['authors_mark'] = $res['90']['x'];
+            }
+            if (isset($res['90']['a'])) {
+                $data['location_index'] = $res['90']['a'];
+            }
+        }
+        $all_authors = null;
+        if (isset($res['100'])) {
+            if (isset($res['100']['a'])) {
+                $all_authors .= $res['100']['a'];
+            }
+        }
+        if (isset($res['245'])) {
+            if (isset($res['245']['a'])) {
+                $data['title'] = $res['245']['a'];
+            }
+
+        }
+        if (isset($res['260'])) {
+            if (isset($res['260']['a'])) {
+                $data['published_city'] = $res['260']['a'];
+            }
+            if (isset($res['260']['b'])) {
+                $data['publisher'] = $res['260']['b'];
+            }
+            if (isset($res['260']['c'])) {
+                $data['published_year'] = $res['260']['c'];
+            }
+
+        }
+        
+        if (isset($res['520'])) {
+            if (isset($res['520']['a'])) {
+                $data['description'] = trim($res['520']['a']);
+            }
+        }
+        
+        if (isset($res['700'])) {
+            if (isset($res['700']['a'])) {
+                $all_authors .=  trim($res['700']['a']);
+
+            }
+        }
+
+        $data['authors'] = json_encode(explode(';', $all_authors));
+        $data['extra1']=json_encode($res);
+
+        $old_data = Import::where('title', '=', $data['title'])->where('published_year', '=', $data['published_year'])->where('published_city', '=', $data['published_city'])->where('publisher', '=', $data['publisher'])->first();
+       
+
+        if ($old_data == null) {
+            $data['status'] = 1;
+            $import = Import::create($data);
+        } else {
+            $old_data->update($data);
+        }
 
     }
     public static function GetData(Request $request)
     {
         $data = [];
+
+        // MarcImportProcess::dispatch("str", "from_armatplus");
+
+
         $type_import = $request->input('type_import');
         $booksType_coverage_image_name = "myimported" . '.' . $request->file('file')->getClientOriginalExtension();
         $filePath = '/storage/' . $request->file('file')->storeAs('books/imported', $booksType_coverage_image_name, 'public');
-        $collection = Collection::fromFile(public_path($filePath));
+        // $record = Record::fromString("");
+        // dd($record); 
+        // $record = Record::fromFile(public_path($filePath));
+
+        // if ($record->type == Marc21::BIBLIOGRAPHIC) {
+        //     foreach ($record->query('020{$2=\noubomn}') as $field) {
+        //         echo $field->getSubfield('a')->getData();
+        //     }
+        //     dd($record->query('020{$2=\noubomn}'));
+        //     dd($record->query('020$a'));
+        //     dd($record->type);
+
+        // }
+        // $collection = Collection::fromFile(public_path($filePath));
+        // foreach ($collection as $k=> $record) { 
+        //     echo Import::get100A_1_($record).'<br>';
+        //     dd($record); 
+
+
+        // }
+        // dd($filePath);
+        // dd($collection);
+        // MarcImportProcess::dispatch($filePath, $type_import);
+
+        // unlink($filePath);
+
+
+        // $collection = Collection::fromFile(public_path($filePath));
         // foreach ($collection as $k=> $record) { 
 
         //     dd($record);
         // }
-        if($type_import=="armat_marc21"){
-            foreach ($collection as $k=> $record) { 
-                 // if($k==2){
-                //     dd(self::converting($record->getField('245')->getSubfield('a')->getData()));
-                // }
-                if($record->getField('020')!=null){
-                    if($record->getField('020')->getSubfield('a'))
-                        $data['isbn'] = self::converting($record->getField('020')->getSubfield('a')->getData());
-                }
 
-
-                if($record->getField('090')!=null){
-                    if($record->getField('090')->getSubfield('x'))
-                        $data['authors_mark'] = self::converting($record->getField('090')->getSubfield('x')->getData());
-                }
-                if($record->getField('100')!=null){
-                    $data['authors'] = self::converting($record->getField('100')->getSubfield('a')->getData());
-                }
-
-
-                 if($record->getField('245')!=null){
-                    $data['title'] = self::converting($record->getField('245')->getSubfield('a')->getData());
-                }
-                if($record->getField('260')!=null){
-                    if($record->getField('260')->getSubfield('a'))
-                        $data['published_city'] = self::converting($record->getField('260')->getSubfield('a')->getData());
-                    if($record->getField('260')->getSubfield('b'))
-                        $data['publisher'] = self::converting($record->getField('260')->getSubfield('b')->getData());
-                    if($record->getField('260')->getSubfield('c'))
-                        $data['published_year'] = self::converting($record->getField('260')->getSubfield('c')->getData());
-                }
-                if($record->getField('300')!=null){
-                    if($record->getField('300')->getSubfield('a'))
-                        $data['betlar_soni'] = self::converting($record->getField('300')->getSubfield('a')->getData());
-                }
-                if($record->getField('520')!=null){
-                    $data['description'] = self::converting($record->getField('520')->getSubfield('a')->getData());
-                }
-                
-                if($record->getField('700')!=null){
-                    $data['authors'] = self::converting($record->getField('700')->getSubfield('a')->getData());
-                }
-                $data['price'] = 0;
-                $data['status'] = 1;
-                 
-                // dd($data);
-                $import = Import::create($data);
-                // dd($record->getField('100')->getSubfield('a')->getData());
-                // dd($record->getField('245')->getSubfield('a')->getData());
-            }
-        }
         if ($type_import == "irbis_utf_8_marc21") {
-
+            $data = [];
+            $data['title']="";
+            $data['published_year']="";
+            $data['published_city']="";
+            $data['publisher']="";
             // $fn_name  = $_REQUEST['file_name'];
             $from     = 0;
             // $format   = $_REQUEST['format'];
@@ -176,7 +282,7 @@ class Import extends Model
             $handle          = @fopen(public_path($filePath), "r");
             $ind             = 0;
             $err             = "";
-
+            
             // global $__vw_p, $__io_r;
 
             // $html = implode('', file('vw/uni2us.io.php'));
@@ -186,7 +292,7 @@ class Import extends Model
             while (!feof($handle)) {
                 $rec      = fgets($handle, 6);
                 $rec_len  = intval($rec);
-
+                
                 if (!($rec_len > 0))
                     continue;
                 $rec_full = @fgets($handle, $rec_len - 4);
@@ -200,7 +306,6 @@ class Import extends Model
                 // $res = getArrayFromIso($rec_full);
                 $res = getArrayFromIso($rec_full);
                 
-
                 if ($res === false) {
                     $err = "INCORRECT_FORMAT";
                     break;
@@ -211,98 +316,41 @@ class Import extends Model
                 // $book = new Book('', $__io_r);
                 // $book->add('', true);
                 // Loading copies
+               
                 $data['price'] = 0;
                 $data['status'] = 1;
-                if (isset($res['010']) && isset($res['010']['^'])){
-                    $price=substr(self::converting($res['010']['^'][0]), 1);
+                if (isset($res['010']) && isset($res['010']['^'])) {
+                    $price = substr(Import::converting($res['010']['^'][0]), 1);
                     $data['price'] = $price;
                 }
-                // dd($res['908']);
-                // if (isset($res['908'])){
-                //     $price=substr(self::converting($res['908']), 1);
-                //     $data['authors_mark'] = $price;
-                // }
-                if (isset($res['200']) && isset($res['200']['^'])){
-                    $title=substr(self::converting($res['200']['^'][0]), 1);
-                    $title=explode("^F", $title);
-                    
+                if (isset($res['675']) && isset($res['675']['3'])) {
+                    $UDK = substr(Import::converting($res['675'][3][0]), 1);
+                    $data['UDK'] = $UDK;
+                }
+
+                if (isset($res['200']) && isset($res['200']['^'])) {
+                    $title = substr(Import::converting($res['200']['^'][0]), 1);
+                    $title = explode("^F", $title);
+
                     $data['title'] = $title[0];
                 }
-                if (isset($res['210']) && isset($res['210']['^'])){
-                    $publisher=self::converting($res['210']['^'][0]);
-                    $publisher=explode("^", $publisher);
-                    if(array_key_exists(2, $publisher))
+                if (isset($res['210']) && isset($res['210']['^'])) {
+                    $publisher = Import::converting($res['210']['^'][0]);
+                    $publisher = explode("^", $publisher);
+                    if (array_key_exists(2, $publisher))
                         $data['published_city'] = $publisher[2];
-                    if(array_key_exists(1, $publisher))
-                        $data['publisher'] = $publisher[1];
-                    if(array_key_exists(0, $publisher))
-                        $data['published_year'] =substr($publisher[0], 1);
-                    
+                    if (array_key_exists(1, $publisher))
+                        $data['publisher'] = ltrim($publisher[1], "C");
+                    if (array_key_exists(0, $publisher))
+                        $data['published_year'] = substr($publisher[0], 1);
                 }
-                if (isset($res['702'])){
-                    $data['authors'] = substr(self::converting($res['702']['^'][0]), 1);
+                if (isset($res['702'])) {
+                    $data['authors'] = substr(Import::converting($res['702']['^'][0]), 1);
                 }
-                // echo "<pre>";
-                // print_r($data);
-                // dd($res);
-                // echo mb_detect_encoding($res['702']['^'][0]);
-                // dd($data);
-                
-                // if (isset($res['910']['^'])) {
-                    
-                //     foreach ($res['910']['^'] as $subInd => $val) {
-                //         $_items = array();
-                //         $_items['INVMODE']  = $val;
-
-                //         if (isset($res['910']['C'][$subInd]))
-                //             $_items['REGDATE'] = $res['910']['C'][$subInd];
-                //         else
-                //             $_items['REGDATE'] = date("Ymd");
-
-                //         if (isset($res['910']['B'][$subInd]))
-                //             $_items['T090E'] = $res['910']['B'][$subInd];
-                //         else
-                //             $_items['T090E'] = '';
-
-                //         if (isset($res['910']['D'][$subInd]))
-                //             $_items['CUSTOM1'] = $res['910']['D'][$subInd];
-                //         else
-                //             $_items['CUSTOM1'] = '';
-
-                //         if (isset($res['910']['E'][$subInd]))
-                //             $_items['T876C'] = $res['910']['E'][$subInd];
-                //         else
-                //             $_items['T876C'] = '';
-
-                //         if (isset($res['910']['H'][$subInd]))
-                //             $_items['T876P'] = $res['910']['H'][$subInd];
-                //         else
-                //             $_items['T876P'] = '';
-
-                //         if (isset($res['910']['U'][$subInd]))
-                //             $_items['T990T'] = $res['910']['U'][$subInd];
-                //         else
-                //             $_items['T990T'] = '';
-
-                //         if (isset($res['910']['1'][$subInd]))
-                //             $_items['CNT'] = intval($res['910']['1'][$subInd]);
-                //         else
-                //             $_items['CNT'] = 1;
-                //         // $book->addCopy($_items, false);
-                //     }
-                // }
-
-                // Loading full text
-                // if (isset($res['856']['U'])) {
-                //     $_file = $res['856']['U'];
-                //     // foreach ($_file as $key => $val)
-                //         // if (file_exists($db_url . $val))
-                //         //     $book->addFile($db_url . $val);
-                // }
-                // unset($book);
+ 
                 $import = Import::create($data);
             }
-            
+
             fclose($handle);
 
             // echo "<pre>";
@@ -314,28 +362,30 @@ class Import extends Model
             //     // dd($record->getField('100')->getSubfield('a')->getData());
             //     // dd($record->getField('245')->getSubfield('a')->getData());
             // }
-        }
-        
-        if ($type_import == "irbis_windows_marc21") {
-             foreach ($collection as $record) {
-                print_r($record->getField('702'));
-                if ($record->getField('100') != null) {
-                    echo $record->getField('100')->getSubfield('a')->getData() ;
-                }
+            
 
-                if (isset($res['260'])){
-                    if(isset($res['260']['A']))
-                        $data['published_city'] = self::converting($res['260']['A'][0]);
-                    if(isset($res['260']['B']))
-                        $data['publisher'] = self::converting($res['260']['B'][0]);
-                    if(isset($res['260']['C']))
-                        $data['published_year'] = self::converting($res['260']['C'][0]);
-                }
-                // dd($record->getField('100')->getSubfield('a')->getData());
-                // dd($record->getField('245')->getSubfield('a')->getData());
-            }
         }
-       
+
+        // if ($type_import == "irbis_windows_marc21") {
+        //     foreach ($collection as $record) {
+        //         print_r($record->getField('702'));
+        //         if ($record->getField('100') != null) {
+        //             echo $record->getField('100')->getSubfield('a')->getData();
+        //         }
+
+        //         if (isset($res['260'])) {
+        //             if (isset($res['260']['A']))
+        //                 $data['published_city'] = self::converting($res['260']['A'][0]);
+        //             if (isset($res['260']['B']))
+        //                 $data['publisher'] = self::converting($res['260']['B'][0]);
+        //             if (isset($res['260']['C']))
+        //                 $data['published_year'] = self::converting($res['260']['C'][0]);
+        //         }
+        //         // dd($record->getField('100')->getSubfield('a')->getData());
+        //         // dd($record->getField('245')->getSubfield('a')->getData());
+        //     }
+        // }
+
 
 
         return $data;

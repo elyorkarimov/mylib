@@ -30,6 +30,7 @@
                             <div class="row">
                                 @include('book.bookdetail', ['book'=>$book])
                                 <hr>
+                                @if ($book_information != null)
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <strong>{{ __('Branches') }}:</strong>
@@ -40,23 +41,38 @@
                                         {!! $book_information->department ? $book_information->department->title : '' !!}
                                     </div>
                                 </div>
+                                @endif
+
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <strong>{{ __('Inventar Number') }}:</strong>
                                         <div class=" text-center">
-                                            @php
-                                                $generator = new Picqer\Barcode\BarcodeGeneratorPNG();
-                                                echo '<img src="data:image/png;base64,' . base64_encode($generator->getBarcode($bookInventar->inventar_number, $generator::TYPE_CODE_128)) . '">';
-                                            @endphp
                                             <br>
                                             {{ $bookInventar->inventar_number }}
                                         </div>
                                     </div>
-                                    {{-- <div class="form-group">
-                                        <strong>{{ __('IsActive') }}:</strong>
-                                        {!! \App\Models\BookInventar::GetStatus($bookInventar->isActive) !!}
-                                    </div> --}}
                                 </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <strong>{{ __('Bar code') }}:</strong>
+                                        <div class=" text-center">
+                                            @if (env('APP_NAME')=='AKBT_TSUL')
+                                                {!! QrCode::size(100)->generate($bookInventar->bar_code); !!}
+                                            @else
+                                                @php
+                                                    $generator = new Picqer\Barcode\BarcodeGeneratorPNG();
+                                                    echo '<img src="data:image/png;base64,' . base64_encode($generator->getBarcode($bookInventar->bar_code, $generator::TYPE_CODE_128)) . '">';
+                                                @endphp
+                                            @endif
+                                            <br>
+                                            {{ $bookInventar->bar_code }}
+                                        </div>
+                                    </div>
+                                </div>
+
+
                             </div>
                             <div class="row">
 

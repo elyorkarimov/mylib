@@ -15,7 +15,7 @@ class CreateImportsTable extends Migration
     {
         Schema::create('imports', function (Blueprint $table) {
             $table->id();
-            $table->string('title')->nullable();
+            $table->longText('title')->nullable();
             $table->longText('authors')->nullable();
 
             $table->string('UDK')->nullable(); //UDK raqami

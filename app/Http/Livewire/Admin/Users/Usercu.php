@@ -45,9 +45,12 @@ class Usercu extends Component
         $this->role = Auth::user()->getRoleNames()->toArray();
         if(count($this->role)>0){ 
             $user = Auth::user()->profile;
-            $this->organization_id = $user->organization_id;
-            $this->branch_id = $user->branch_id;
-            $this->department_id = $user->department_id;
+            if($user != null){
+                $this->organization_id = $user->organization_id;
+                $this->branch_id = $user->branch_id;
+                $this->department_id = $user->department_id;
+    
+            }
         } 
 
         if ($this->user_id != null) {
@@ -216,11 +219,14 @@ class Usercu extends Component
         if ($this->user_image != null) {
             $image_path = $this->user_image->store('users/avatar/images', 'public');
         }
-        $inventar = $this->inventar_number;
+        $int_inventar=0;
+        $inventar = trim($this->inventar_number);
         if ($inventar[0] == 'f') {
-            $inventar = $this->inventar_number;
+            $inventar = trim($this->inventar_number);
+            $int_inventar=substr($this->inventar_number, 1);
         } else {
-            $inventar = 'f' . $this->inventar_number;
+            $int_inventar=trim($this->inventar_number);
+            $inventar = 'f' . trim($this->inventar_number);
         }
 
         $userData = [
@@ -228,13 +234,14 @@ class Usercu extends Component
             'status' => $this->isActive,
             'name' => $this->name,
             'email' => $this->email,
+            'login' => $this->email,
             'inventar_number' => $inventar,
+            'inventar' => $int_inventar,
         ];
         DB::beginTransaction();
         try {
             $user = User::create($userData);
             $user->assignRole($this->userroles);
-
 
             $profileData = [
                 'phone_number' => $this->phone_number,
@@ -278,6 +285,8 @@ class Usercu extends Component
     }
     public function update()
     {
+
+
         $this->validate(
             [
                 'name' => 'required',
@@ -325,6 +334,7 @@ class Usercu extends Component
                 'userroles' => __('Role'),
             ]
         );
+        
         $image_path = null;
         if ($this->user_image != null) {
             $image_path = $this->user_image->store('users/avatar/images', 'public');
@@ -336,18 +346,23 @@ class Usercu extends Component
         } else {
             $image_path = $this->user_old_image;
         }
-        $inventar = $this->inventar_number;
+        $int_inventar=0;
+        $inventar = trim($this->inventar_number);
         if ($inventar[0] == 'f') {
-            $inventar = $this->inventar_number;
+            $inventar = trim($this->inventar_number);
+            $int_inventar=substr($this->inventar_number, 1);
         } else {
-            $inventar = 'f' . $this->inventar_number;
+            $int_inventar=trim($this->inventar_number);
+            $inventar = 'f' . trim($this->inventar_number);
         }
         $userData = [
             'password' => Hash::make($this->password),
             'status' => $this->isActive,
             'name' => $this->name,
             'email' => $this->email,
+            'login' => $this->email,
             'inventar_number' => $inventar,
+            'inventar' => $int_inventar,
         ];
         if (!empty($this->password)) {
             $this->password = Hash::make($this->password);

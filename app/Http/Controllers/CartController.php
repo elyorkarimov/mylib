@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Book;
 use App\Models\Order;
+use App\Models\OrderDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -32,16 +33,21 @@ class CartController extends Controller
     {
         $carts = session()->get('cart', []);
         $order_number = Auth::user()->id.''.Order::GetOrderNumber();
+        $orderData=[
+            'order_date'=>date("Y-m-d"),
+            'order_number'=> $order_number,
+            'status'=> Order::$SENT,
+            'type'=> "book",
+            'reader_id'=> Auth::user()->id,
+        ];
+        $orderMain = Order::create($orderData);
         foreach ($carts as $k => $book){
             $data=[
-                'order_date'=>date("Y-m-d"),
-                'order_number'=> $order_number,
-                'status'=> 1,
-                'type'=> "book",
-                'reader_id'=> Auth::user()->id,
+                'status'=> Order::$SENT,
+                'order_id'=> $orderMain->id,
                 'book_id'=> $k,
             ];
-            $order = Order::create($data); 
+            $order = OrderDetail::create($data); 
         }
 
         session()->put('cart', []);
@@ -56,10 +62,23 @@ class CartController extends Controller
     {
         $cur_user_id=Auth::user()->id;
         $order_number = trim($request->get('id'));
+        $orderid = trim($request->get('orderid'));
+        
+        if($orderid!=""){
+            $order = Order::where('id', '=', $orderid)->where('reader_id', '=', Auth::user()->id)->orderBy('id', 'desc')->firstOrfail();
+            return view('reader.myorderdetail', compact('order'));
+        }
         if($order_number!=""){
-            dd("VIEW ORDER DETAIL");
+            $perPage = 20;
+            $orders = Order::where('order_number', '=', $order_number)->where('reader_id', '=', Auth::user()->id)->orderBy('id', 'desc')->paginate($perPage);
+            return view('reader.myorder', compact('orders'))
+                ->with('i', (request()->input('page', 1) - 1) * $orders->perPage());
         }else{
-            dd("ALL");
+            $perPage = 20;
+            $orders = Order::where('reader_id', '=', Auth::user()->id)->orderBy('id', 'desc')->paginate($perPage);
+
+            return view('reader.myorder', compact('orders'))
+                ->with('i', (request()->input('page', 1) - 1) * $orders->perPage());
         }
     }
     /**

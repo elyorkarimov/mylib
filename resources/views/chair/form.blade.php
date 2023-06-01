@@ -38,7 +38,7 @@
                                                     {{ $k }}:</label>
                                                 @php
                                                     $title = null;
-                                                    if (count($chair->chairTranslations) > 0 && $chair->chairTranslations[$step]->locale == $k) {
+                                                    if (count($chair->chairTranslations) > 0 && isset($chair->chairTranslations[$step]) && $chair->chairTranslations[$step]->locale == $k) {
                                                         $title = $chair->chairTranslations[$step]->title;
                                                     }
                                                     $step++;

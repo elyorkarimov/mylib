@@ -88,6 +88,14 @@ class Chair extends Model implements TranslatableContract
     {
         return $this->hasOne('App\Models\User', 'id', 'updated_by');
     }
+    
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function profiles()
+    {
+        return $this->hasMany('App\Models\UserProfile', 'chair_id', 'id');
+    }
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne

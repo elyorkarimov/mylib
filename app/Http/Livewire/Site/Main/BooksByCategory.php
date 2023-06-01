@@ -11,12 +11,12 @@ class BooksByCategory extends Component
     public $bookTypes, $book_type_id, $books;
 
     public function mount(){
-        $this->books = Book::active()->latest()->limit(12)->get();
+        $this->books = Book::active()->with(['booksType', 'booksType.translations'])->latest()->limit(12)->get();
 
     }
     public function render()
     {
-        $this->bookTypes = BooksType::active()->translatedIn(app()->getLocale())->limit(6)->get();
+        $this->bookTypes = BooksType::active()->with('translations')->translatedIn(app()->getLocale())->limit(6)->get();
         // $this->books = Book::active()->latest()->limit(12)->get();
 
         return view('livewire.site.main.books-by-category');
@@ -27,7 +27,7 @@ class BooksByCategory extends Component
     {
         $this->book_type_id=(int)$book_type_id;
        
-        $this->books = Book::where('books_type_id', '=', $book_type_id)->active()->latest()->limit(12)->get();
+        $this->books = Book::with('booksType')->where('books_type_id', '=', $book_type_id)->active()->latest()->limit(12)->get();
         
 
 

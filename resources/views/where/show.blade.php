@@ -26,8 +26,6 @@
                 <div class="card">
                     <div class="card-body">
                         
-                        
-                           
                         <div class="form-group">
                             <strong>{{ __('Title') }}:</strong>
                             {{ $where->title }}

@@ -29,10 +29,10 @@ use Astrotomic\Translatable\Contracts\Translatable as TranslatableContract;
  */
 class Author extends Model implements TranslatableContract
 {
-    
+
     use Translatable; // 2. To add translation methods
     public $translatedAttributes = ['title', 'locale', 'slug'];
-    
+
 
 
     /**
@@ -40,7 +40,7 @@ class Author extends Model implements TranslatableContract
      *
      * @var array
      */
-    protected $fillable = ['code','isActive','image_path','icon_path','created_by','updated_by'];
+    protected $fillable = ['code', 'isActive', 'image_path', 'icon_path', 'created_by', 'updated_by'];
 
 
     /**
@@ -50,9 +50,9 @@ class Author extends Model implements TranslatableContract
     {
         return $this->hasMany('App\Models\AuthorTranslation', 'author_id', 'id');
     }
-    
-    
-    
+
+
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
@@ -105,7 +105,7 @@ class Author extends Model implements TranslatableContract
             $filePath = $request->file('file')->storeAs('authors/photo', $journal_coverage_image_name, 'public');
             $data['image_path'] = $journal_coverage_image_name;
         }
- 
+
         $data['isActive'] = $request->input('isActive');
         return $data;
     }
@@ -119,29 +119,90 @@ class Author extends Model implements TranslatableContract
     public static function GetById($id)
     {
         $model = self::find($id);
-        if($model!=null){
+        if ($model != null) {
             return $model;
         }
         return null;
     }
+    public function change_str_with_alphabet($str)
+    {
+        $returnStr = str_replace('&#1202;', 'Ҳ', $str);
+        $returnStr = str_replace('&#1203;', 'ҳ', $returnStr);
+        $returnStr = str_replace('&#1178;', 'Қ', $returnStr);
+        $returnStr = str_replace('&#1179;', 'қ', $returnStr);
+        $returnStr = str_replace('&#1170;', 'Ғ', $returnStr);
+        $returnStr = str_replace('&#1171;', 'ғ', $returnStr);
+        $returnStr = str_replace('&#1171;', 'ғ', $returnStr);
+        $returnStr = str_replace("\'", "'", $returnStr);
+        return $returnStr;
+    }
+
     public static function GetIdByJsonName($names)
     {
-        $ids=[];
-        if($names != null && count(json_decode($names))>0){
-            foreach(json_decode($names) as $k=>$v){
-                $model = self::active()->whereTranslation('title', $v)->first();
-                $ids[$k]=$model->id;
+        $ids = [];
+        if ($names != null && json_decode($names) != null && count(json_decode($names)) > 0) {
+            foreach (json_decode($names) as $k => $v) {
+                $model = self::active()->whereTranslation('title', self::change_str_with_alphabet($v))->first();
+                if ($model != null) {
+                    $ids[$k] = $model->id;
+                } else {
+                    foreach (json_decode($names) as $ks => $v) {
+                        $author = Author::whereTranslation("title", self::change_str_with_alphabet($v))->first();
+
+                        if ($author == null && $v != '') {
+                            $authorData = null;
+                            $count = 0;
+                            foreach (config('app.locales') as $til_code => $locale) {
+                                $authorData[$til_code] = [
+                                    'title' => self::change_str_with_alphabet($v)
+                                ];
+                                $count += 1;
+                            }
+                            $modelAuthor = Author::create($authorData);
+                            $ids[$k] = $modelAuthor->id;
+                        }
+                    }
+                }
+            }
+        } else {
+            $model = self::active()->whereTranslation('title', self::change_str_with_alphabet($names))->first();
+            if ($model != null) {
+                $ids = $model->id;
+            } else {
+                $authorData = null;
+                $count = 0;
+                foreach (config('app.locales') as $til_code => $locale) {
+                    $authorData[$til_code] = [
+                        'title' => self::change_str_with_alphabet($names)
+                    ];
+                    $count += 1;
+                }
+                $modelAuthor = Author::create($authorData);
             }
         }
         return $ids;
     }
-    
+
     public static function GetTitleById($id)
     {
         $model = self::find($id);
-        if($model!=null){
+        if ($model != null) {
             return $model->title;
         }
         return null;
+    }
+
+
+    public static function GetStringNameByJsonName($names)
+    {
+        $ids = "";
+        if ($names != null && json_decode($names) != null && count(json_decode($names)) > 0) {
+            foreach (json_decode($names) as $k => $v) {
+                $ids .= $v . ',';
+            }
+        }else{
+            return $names;
+        }
+        return rtrim($ids, ',');
     }
 }

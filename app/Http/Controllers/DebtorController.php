@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Debtor;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 /**
@@ -11,20 +12,50 @@ use Illuminate\Http\Request;
  */
 class DebtorController extends Controller
 {
+        /**
+     * create a new instance of the class
+     *
+     * @return void
+     */
+    function __construct()
+    {
+        $this->middleware(['role:SuperAdmin|Admin|Manager']);
+
+        // $this->middleware('permission:list|create|edit|delete|user-list|user-create|user-edit|user-delete', ['only' => ['index', 'store']]);
+        // $this->middleware('permission:create|user-create', ['only' => ['create', 'store']]);
+        // $this->middleware('permission:edit|user-edit', ['only' => ['edit', 'update']]);
+        // $this->middleware('permission:delete|user-delete', ['only' => ['destroy']]);
+        // $this->middleware('permission:deletedb', ['only' => ['destroyDB']]);
+        //  $this->middleware('permission:list|create|edit|delete', ['only' => ['index', 'store']]);
+        //  $this->middleware('permission:create', ['only' => ['create', 'store']]);
+        //  $this->middleware('permission:edit', ['only' => ['edit', 'update']]);
+        //  $this->middleware('permission:delete', ['only' => ['destroy']]);
+        //  $this->middleware('permission:deletedb', ['only' => ['destroyDB']]);
+
+    }
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index($language, Request $request)
     {
-        $perPage = 20;
-        $debtors = Debtor::orderBy('return_time', 'ASC')->paginate($perPage);
-        // $debtors = Debtor::whereNull('qaytargan_vaqti')->groupBy('kitobxon_id')->orderBy('qaytarish_vaqti', 'asc')->paginate();
+        $status = trim($request->get('status'));
+        $keyword = trim($request->get('keyword'));
+        if($status==null){
+            $status=99;
+        }
 
-// dd($debtors);groupBy('reader_id')->
-        return view('debtor.index', compact('debtors'))
-            ->with('i', (request()->input('page', 1) - 1) * $debtors->perPage());
+        if ($status == 99) {
+            $debtors = Debtor::with(['reader', 'reader.profile'])->orderBy('return_time', 'asc')->orderBy('status', 'ASC')->distinct()->paginate(20,['reader_id']);
+        }elseif($status == 98){
+            $debtors = Debtor::with(['reader', 'reader.profile'])->whereNull('returned_time')->where('return_time', '<', date("Y-m-d"))->orderBy('return_time', 'asc')->distinct()->paginate(20,['reader_id']);
+        } else {
+            $debtors = Debtor::with(['reader', 'reader.profile'])->where('status', '=', $status)->orderBy('return_time', 'asc')->distinct()->paginate(20,['reader_id']);
+        } 
+
+        
+        return view('debtor.index', compact('debtors', 'status', 'keyword'));
     }
 
     /**
@@ -61,11 +92,20 @@ class DebtorController extends Controller
      * @param  int $id
      * @return \Illuminate\Http\Response
      */
-    public function show($language, $id)
+    public function show($language, $id, Request $request)
     {
-        $debtor = Debtor::find($id);
+        $status=trim($request->get('status'));
+        $perPage = 20;
 
-        return view('debtor.show', compact('debtor'));
+        $user = User::find($id);
+        if($status==99){
+            $debtors = Debtor::where('reader_id', $id)->orderBy('return_time', 'asc')->orderBy('status', 'ASC')->paginate($perPage);
+        }elseif($status==98){
+            $debtors = Debtor::whereNull('returned_time')->where('reader_id', $id)->where('return_time', '<', date("Y-m-d"))->orderBy('return_time', 'desc')->paginate($perPage);
+        }else{
+            $debtors = Debtor::where('reader_id', $id)->where('status', $status)->orderBy('return_time', 'asc')->paginate($perPage);
+        }
+        return view('debtor.show', compact('debtors', 'user'))->with('i', (request()->input('page', 1) - 1) * $debtors->perPage());
     }
 
     /**

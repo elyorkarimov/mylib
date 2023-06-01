@@ -8,25 +8,25 @@ use Spatie\Permission\Models\Permission;
 
 class PermissionController extends Controller
 {
-    /**
+        /**
      * create a new instance of the class
      *
      * @return void
      */
     function __construct()
     {
+        $this->middleware(['role:SuperAdmin|Admin|Manager']);
 
-        // $this->middleware('permission:list|create|edit|delete|permission-list|permission-create|permission-edit|permission-delete', ['only' => ['index', 'store']]);
-        // $this->middleware('permission:create|permission:permission-create', ['only' => ['create', 'store']]);
-        // $this->middleware('permission:edit|permission:permission-edit', ['only' => ['edit', 'update']]);
-        // $this->middleware('permission:delete|permission:permission-delete', ['only' => ['destroy']]);
-
-        // $this->middleware('permission:list|create|edit|delete', ['only' => ['index', 'store']]);
-
-        // $this->middleware('permission:create', ['only' => ['create', 'store']]);
-        // $this->middleware('permission:edit', ['only' => ['edit', 'update']]);
-        // $this->middleware('permission:delete', ['only' => ['destroy']]);
+        // $this->middleware('permission:list|create|edit|delete|user-list|user-create|user-edit|user-delete', ['only' => ['index', 'store']]);
+        // $this->middleware('permission:create|user-create', ['only' => ['create', 'store']]);
+        // $this->middleware('permission:edit|user-edit', ['only' => ['edit', 'update']]);
+        // $this->middleware('permission:delete|user-delete', ['only' => ['destroy']]);
         // $this->middleware('permission:deletedb', ['only' => ['destroyDB']]);
+        //  $this->middleware('permission:list|create|edit|delete', ['only' => ['index', 'store']]);
+        //  $this->middleware('permission:create', ['only' => ['create', 'store']]);
+        //  $this->middleware('permission:edit', ['only' => ['edit', 'update']]);
+        //  $this->middleware('permission:delete', ['only' => ['destroy']]);
+        //  $this->middleware('permission:deletedb', ['only' => ['destroyDB']]);
 
     }
 

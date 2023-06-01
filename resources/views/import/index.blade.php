@@ -7,7 +7,7 @@
 @section('content')
     <div class="content">
         <div class="breadcrumb-wrapper breadcrumb-contacts">
-            <div>
+            <div> 
                 <h1>{{ __('Import') }}</h1>
                 <p class="breadcrumbs"><span><a
                             href="{{ route('admin.home', app()->getLocale()) }}">{{ __('Home') }}</a></span>
@@ -23,7 +23,33 @@
         <div class="row">
             <div class="col-12">
                 <div class="ec-vendor-list card card-default">
+                    <div class="card-header">
+                        <form action="{{ route('imports.index', app()->getLocale()) }}" method="GET"
+                            accept-charset="UTF-8" role="search" style="width: 100%;">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <input type="text" class="form-control" name="keyword"
+                                        placeholder="{{ __('Keyword') }}..." value="{{ $keyword }}">
+                                </div>
+                            </div>
+
+                            <div class="card-footer">
+                                <button type="submit"
+                                    class="btn btn-sm btn-primary float-left">{{ __('Search') }}</button>
+
+                                <a href="{{ route('imports.index', app()->getLocale()) }}"
+                                    class="btn btn-sm btn-info ">{{ __('Clear') }}</a>
+                            </div>
+                        </form>
+                        <div class="row">
+                            <div class="col">
+                                <br>
+                                {!! __('Number of records is :attribute', ['attribute' => $imports->total()]) !!}
+                            </div>
+                        </div>
+                    </div>
                     <div class="card-body">
+                        
                         <form method="POST" action="{{ route('imports.store', app()->getLocale()) }}" role="form"
                             enctype="multipart/form-data">
                             @csrf
@@ -59,34 +85,81 @@
                                 <button type="submit" class="btn btn-primary">{{ __('Save') }}</button>
                             </div>
                         </form>
+
                         <div class="table-responsive">
 
                             <table class="table table-striped table-hover">
                                 <thead class="thead">
                                     <tr>
                                         <th>No</th>
-
                                         <th>{{ __('IsActive') }}</th> 
-                                        <th>Title</th>
-                                        <th>Authors</th>
-                                        <th>Udk</th>
-                                        <th>Bbk</th>
-                                        <th>Publisher</th>
-                                        <th>Published City</th>
-                                        <th>Published Year</th>
-                                        <th>Isbn</th>
-                                        <th>Description</th>
-                                        <th>Published Date</th>
-                                        <th>Authors Mark</th>
-
-
+                                        <th>{{ __('Dc Title') }}</th> 
+                                        <th>{{ __('Dc Publisher') }}</th>
+                                        <th>{{ __('Dc Published City') }}</th>
+                                        <th>{{ __('Dc Date') }}</th>
+                                        <th>{{ __('ISBN') }}</th>
                                         <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    <form action="{{ route('imports.index', app()->getLocale()) }}" method="GET" accept-charset="UTF-8"
+                                        role="search">
+                                        <tr>
+                                            <th colspan="2">
+                                                <div class="form-group">
+                                                    <input type="text" class="form-control " name="id"
+                                                        id="id" value="{{ $id }}"
+                                                        placeholder="{{ __('Id') }}" />
+                                                </div>
+                                            </th> 
+                                            <th>
+                                                <div class="form-group">
+                                                    <input type="text" class="form-control " name="name" id="name"
+                                                        value="{{ $name }}"
+                                                        placeholder="{{ __('Dc Title') }}" />
+                                                </div>    
+                                            </th> 
+                                            <th>
+                                                <div class="form-group">
+                                                    <input type="text" class="form-control " name="publisher" id="publisher"
+                                                        value="{{ $publisher }}"
+                                                        placeholder="{{ __('Dc Publisher') }}" />
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div class="form-group">
+                                                    <input type="text" class="form-control " name="publisher_city" id="publisher_city"
+                                                        value="{{ $publisher_city }}"
+                                                        placeholder="{{ __('Dc Published City') }}" />
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div class="form-group">
+                                                    <input type="text" class="form-control " name="date" id="date"
+                                                        value="{{ $published_year }}"
+                                                        placeholder="{{ __('Dc Date') }}" />
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div class="form-group">
+                                                    <input type="text" class="form-control " name="isbn" id="isbn"
+                                                        value="{{ $isbn }}"
+                                                        placeholder="{{ __('ISBN') }}" />
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div class="input-group">
+                                                    <a href="{{ route('imports.index', app()->getLocale()) }}"
+                                                        class="btn btn-sm btn-info">{{ __('Clear') }}</a>
+                                                    <button type="submit"
+                                                        class="btn btn-sm btn-primary float-right">{{ __('Search') }}</button>
+                                                </div>
+                                            </th>
+                                        </tr>
+                                    </form>
                                     @foreach ($imports as $import)
                                         <tr>
-                                            <td>{{ ++$i }}</td>
+                                            <td>{{ $import->id }}</td>
                                             <td>
                                                 @if ($import->status == 0)
                                                     <span class="badge badge-danger"><i class="mdi mdi-close-circle "></i></span>
@@ -96,17 +169,11 @@
                                                     {{__("Imported")}}
                                                 @endif
                                                 
-                                            <td>{{ $import->title }}</td>
-                                            <td>{{ $import->authors }}</td>
-                                            <td>{{ $import->UDK }}</td>
-                                            <td>{{ $import->BBK }}</td>
+                                            <td>{{ $import->title }}</td> 
                                             <td>{{ $import->publisher }}</td>
                                             <td>{{ $import->published_city }}</td>
                                             <td>{{ $import->published_year }}</td>
-                                            <td>{{ $import->ISBN }}</td>
-                                            <td>{{ $import->description }}</td>
-                                            <td>{{ $import->published_date }}</td>
-                                            <td>{{ $import->authors_mark }}</td>
+                                            <td>{{ $import->ISBN }}</td>  
 
 
                                             <td>
@@ -124,6 +191,17 @@
                                                     <button type="submit"
                                                         class="btn btn-danger btn-sm">{{ __('Delete') }}</button>
                                                 </form>
+                                                @if (Auth::user()->hasRole('SuperAdmin'))
+                                                    <br>
+                                                    <form method="POST"
+                                                        action="{{ route('imports.delete', [app()->getLocale(), 'id' => $import->id]) }}">
+                                                        @csrf
+                                                        <input name="type" type="hidden" value="DELETE">
+                                                        <button type="submit"
+                                                            class="btn btn-sm btn-danger btn-flat show_confirm"
+                                                            data-toggle="tooltip">{{ __('Delete from DataBase') }}</button>
+                                                    </form>
+                                                @endif
                                             </td>
                                         </tr>
                                     @endforeach

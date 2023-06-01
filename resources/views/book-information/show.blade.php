@@ -54,6 +54,7 @@
                             <strong>Deportmetn Id:</strong>
                             {{ $bookInformation->deportmetn_id }}
                         </div>
+                        
                         <div class="form-group">
                             <strong>Book Id:</strong>
                             {{ $bookInformation->book_id }}

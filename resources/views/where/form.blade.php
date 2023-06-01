@@ -37,7 +37,7 @@
                                                     {{ $k }}:</label>
                                                 @php
                                                     $title = null;
-                                                     if (count($where->whereTranslations) > 0 && $where->whereTranslations[$step]->locale == $k) {
+                                                     if (count($where->whereTranslations) > 0 && isset($where->whereTranslations[$step]) && $where->whereTranslations[$step]->locale == $k) {
                                                         $title = $where->whereTranslations[$step]->title;
                                                     }
                                                     $step++;

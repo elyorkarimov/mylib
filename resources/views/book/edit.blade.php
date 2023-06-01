@@ -18,19 +18,18 @@
         </div>
         <div>
             <a class="btn btn-warning " href="{{ route('books.show', [app()->getLocale(), $book->id]) }}"> {{ __('Show') }}</a> |
- 
-            <a href="{{ url(app()->getLocale() . '/admin/books') }}"  class="btn btn-primary" >{{ __('Back') }}</a>
+
+            <a href="{{ url()->previous() }}"  class="btn btn-primary" >{{ __('Back') }}</a>
         </div>
     </div>
-    <livewire:admin.books.update :book_id="$book->id" />
-    {{-- @includeif('partials.errors')
+    {{-- <livewire:admin.books.update :book_id="$book->id" /> --}}
+    @includeif('partials.errors')
     <form method="POST" action="{{ route('books.update', [app()->getLocale(), $book->id]) }}"  role="form" enctype="multipart/form-data">
         {{ method_field('PATCH') }}
         @csrf
+         @include('book.form')
 
-        @include('book.form')
-
-    </form>  --}}
+    </form>  
 
 </div>
 

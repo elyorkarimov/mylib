@@ -70,7 +70,7 @@
                                                         <tr>
                                                             <th class="px-4 px-xl-5">{{ __('Book Subject') }}: </th>
                                                             <td class="">
-                                                                @if ($book->dc_subjects)
+                                                                @if ($book->dc_subjects != "null" && $book->dc_subjects != null)
                                                                     | @foreach (json_decode($book->dc_subjects) as $key => $value)
                                                                         {{ $value }} |
                                                                     @endforeach
@@ -145,16 +145,25 @@
                                                     @endif
 
 
-                                                    @if ($book->full_text_path)
+                                                    @if ($book->full_text_path && !Auth::guest())
                                                         <tr>
                                                             <th class="px-4 px-xl-5">{{ __('Book file') }}:</th>
                                                             <td>
-                                                                {{-- <a href="/storage/{{ $book->full_text_path }}"
-                                                                    target="__blank">{{ __('Download') }}</a> --}}
-                                                                <a href="{{ url(app()->getLocale() . '/books/' . $book->slug) }}/pdf"
-                                                                        target="__blank">{{ __('Download') }}</a>
-    
+
+                                                                @if ($book->file_format=='pdf')
+                                                                <a href="{{ url(app()->getLocale() . '/books/' . $book->id) }}/pdf"
+                                                                    target="__blank">{{ __('Download') }}</a>
+                                                                @else
+                                                                <a href="/storage/{{ $book->full_text_path }}"
+                                                                    target="__blank">{{ __('Download') }}</a>
+                                                                @endif
+                                                                    
                                                             </td>
+                                                        </tr>
+                                                    @else
+                                                        <tr>
+                                                            <th class="px-4 px-xl-5 text-danger">To‘liq matnni ko‘chirib olish uchun kutubxonaga a'zo bo‘lish shart</th>
+                                                            <td></td>
                                                         </tr>
                                                     @endif
                                                     @if ($book->file_format)
@@ -202,6 +211,8 @@
                                             </table>
                                         </div>
                                         <!-- End Mockup Block -->
+                                        {!! QrCode::size(200)->generate(URL::current()); !!}
+
                                     </div>
                                 </div>
                                 <!-- End Tab Content -->
@@ -249,7 +260,7 @@
                                         <div
                                             class="woocommerce-LoopProduct-link woocommerce-loop-product__link d-block position-relative">
                                             <div class="woocommerce-loop-product__thumbnail">
-                                                <a href="{{ url(app()->getLocale() . '/books/' . $item->slug) }}"
+                                                <a href="{{ url(app()->getLocale() . '/books/' . $item->id) }}"
                                                     class="d-block">
                                                     @if ($item->image_path)
                                                         <img src="/storage/{{ $item->image_path }}"
@@ -264,12 +275,12 @@
                                             </div>
                                             <div class="woocommerce-loop-product__body product__body pt-3 bg-white">
                                                 <div class="text-uppercase font-size-1 mb-1 text-truncate"><a
-                                                        href="{{ url(app()->getLocale() . '/books/' . $item->slug) }}">{{ $item->booksType->title }}</a>
+                                                        href="{{ url(app()->getLocale() . '/books/' . $item->id) }}">{{ $item->booksType->title }}</a>
                                                 </div>
                                                 <h2
                                                     class="woocommerce-loop-product__title product__title h6 text-lh-md mb-1 text-height-2 crop-text-2 h-dark">
                                                     <a
-                                                        href="{{ url(app()->getLocale() . '/books/' . $item->slug) }}">{{ $item->dc_title }}</a>
+                                                        href="{{ url(app()->getLocale() . '/books/' . $item->id) }}">{{ $item->dc_title }}</a>
                                                 </h2>
 
                                                 <div class="font-size-2  mb-1 text-truncate">

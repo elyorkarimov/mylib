@@ -135,5 +135,18 @@ class Department extends Model implements TranslatableContract
         return $rules;
     }
 
-
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function bookInventar()
+    {
+        return $this->hasMany('App\Models\BookInventar', 'deportmetn_id', 'id');
+    }
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function book()
+    {
+        return $this->hasMany('App\Models\Book', 'deportment_id', 'id');
+    }
 }

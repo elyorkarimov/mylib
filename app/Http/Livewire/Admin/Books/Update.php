@@ -29,7 +29,7 @@ class Update extends Component
     public $branches, $book, $bookSubjects, $bookFileTypes, $bookAccessTypes, $bookTextTypes, $bookTexts, $bookLanguages, $bookTypes, $bookAuthors, $new_subjects, $wheres, $whos;
     public $departments;
     public $book_face_image, $book_full_text, $book_face_old_image, $old_full_text_path;
-    public $dc_title, $authors_mark, $dc_published_city, $dc_publisher, $dc_UDK, $ISBN, $dc_description, $dc_source, $dc_date, $betlar_soni = 0, $price = 0, $status, $books_type, $book_language, $book_text, $book_text_type, $book_access_type, $book_file_type;
+    public $dc_title, $authors_mark, $dc_published_city, $dc_publisher, $dc_UDK, $ISBN, $uk, $dc_description, $dc_source, $dc_date, $betlar_soni = 0, $price = 0, $status, $books_type, $book_language, $book_text, $book_text_type, $book_access_type, $book_file_type;
     public $selectedBranches = NULL, $new_subject, $where_id, $who_id;
     public $dc_authors = [], $subjects = [];
  
@@ -49,6 +49,7 @@ class Update extends Component
         $this->dc_publisher = $book->dc_publisher;
         $this->dc_published_city = $book->dc_published_city;
         $this->ISBN = $book->ISBN;
+        $this->uk = $book->uk;
         $this->dc_description = $book->dc_description;
         $this->dc_source = $book->dc_source;
         $this->dc_date = $book->dc_date;
@@ -127,8 +128,8 @@ class Update extends Component
             $image_path=$this->book_face_old_image;
         }
         
-       
-        if(count($this->subjects)>0){
+
+        if($this->subjects != null && count($this->subjects)>0){
             foreach($this->subjects as $k=>$v){
                 $book_subjects=BookSubject::whereTranslation("title", $v)->first();
                 if($book_subjects==null){
@@ -145,7 +146,7 @@ class Update extends Component
                 
             }
         }
-        if(count($this->dc_authors)>0){
+        if($this->dc_authors != null &&  count($this->dc_authors)>0){
             foreach($this->dc_authors as $k=>$v){
                 $author=Author::whereTranslation("title", $v)->first();
                 if($author==null){
@@ -219,6 +220,7 @@ class Update extends Component
             'dc_publisher' => trim($this->dc_publisher),
             'dc_published_city' => trim($this->dc_published_city),
             'ISBN' => trim($this->ISBN),
+            'uk' => trim($this->uk),
             'dc_description' => trim($this->dc_description),
             'dc_date' => trim($this->dc_date),
             'betlar_soni' => trim($this->betlar_soni),

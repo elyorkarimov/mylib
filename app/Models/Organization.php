@@ -39,7 +39,7 @@ class Organization extends Model implements TranslatableContract
 {
     
     use Translatable; // 2. To add translation methods
-    public $translatedAttributes = ['title', 'locale', 'slug'];
+    public $translatedAttributes = ['title', 'address', 'locale', 'slug'];
     
 
 
@@ -125,5 +125,20 @@ class Organization extends Model implements TranslatableContract
         return $rules;
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function bookInventar()
+    {
+        return $this->hasMany('App\Models\BookInventar', 'organization_id', 'id');
+    }
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function book()
+    {
+        return $this->hasMany('App\Models\Book', 'organization_id', 'id');
+    }
+    
 
 }

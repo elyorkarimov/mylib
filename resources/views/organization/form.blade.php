@@ -35,17 +35,35 @@
                                                 <label class="required"
                                                     for="title_{{ $k }}">{{ __('Title') }}
                                                     {{ $k }}:</label>
-                                                @php
+                                                @php  
                                                     $title = null;
-                                                     if (count($organization->organizationTranslations) > 0 && $organization->organizationTranslations[$step]->locale == $k) {
+                                                     if (count($organization->organizationTranslations) > 0 && isset($organization->organizationTranslations[$step]) && $organization->organizationTranslations[$step]->locale == $k) {
                                                         $title = $organization->organizationTranslations[$step]->title;
                                                     }
-                                                    $step++;
+                                                    
                                                 @endphp
                                                 <input type="text" class="form-control " name="title_{{ $k }}"
                                                     id="title_{{ $k }}" placeholder="{{ __('Title') }}"
                                                     value="{{ $title }}" />
                                                 @error('title_{{ $k }}')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label class="required"
+                                                    for="address_{{ $k }}">{{ __('Address') }}
+                                                    {{ $k }}:</label>
+                                                @php
+                                                    $address = null;
+                                                    if (count($organization->organizationTranslations) > 0 && isset($organization->organizationTranslations[$step]) && $organization->organizationTranslations[$step]->locale == $k) {
+                                                        $address = $organization->organizationTranslations[$step]->address;
+                                                    }
+                                                    $step++;
+                                                @endphp
+                                                <textarea name="address_{{ $k }}" class="address body form-control ckeditor " id="address_{{ $k }}" cols="30" rows="10">{{ $address }}</textarea>
+                                                @error('address_{{ $k }}')
                                                     <span class="text-danger">{{ $message }}</span>
                                                 @enderror
                                             </div>

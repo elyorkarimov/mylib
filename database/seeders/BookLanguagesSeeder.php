@@ -46,20 +46,74 @@ class BookLanguagesSeeder extends Seeder
             'en' => ['title' => "German"],
         ];
         BookLanguage::create($data);
+        
         $data = [
             'isActive' => 1,
             'created_by' => 1,
             'updated_by' => 1,
-            'uz' => ['title' => "O‘zbekcha&Ruscha&Inglizcha"],
-            'en' => ['title' => "Uzbek&Russian&English"],
+            'uz' => ['title' => "O'zbekcha&Ruscha&Inglizcha"],
+            'en' => ['title' => "O'zbekcha&Ruscha&Inglizcha"],
+        ];
+        BookLanguage::create($data);
+        
+        $data = [
+            'isActive' => 1,
+            'created_by' => 1,
+            'updated_by' => 1,
+            'uz' => ['title' => "O'zbekcha&Ruscha"],
+            'en' => ['title' => "O'zbekcha&Ruscha"],
+        ];
+        BookLanguage::create($data);
+        
+        $data = [
+            'isActive' => 1,
+            'created_by' => 1,
+            'updated_by' => 1,
+            'uz' => ['title' => "O'zbekcha&Inglizcha"],
+            'en' => ['title' => "O'zbekcha&Inglizcha"],
+        ];
+        BookLanguage::create($data);
+        
+        $data = [
+            'isActive' => 1,
+            'created_by' => 1,
+            'updated_by' => 1,
+            'uz' => ['title' => "O'zbekcha&Nemischa"],
+            'en' => ['title' => "O'zbekcha&Nemischa"],
+        ];
+        BookLanguage::create($data);
+         
+        
+        $data = [
+            'isActive' => 1,
+            'created_by' => 1,
+            'updated_by' => 1,
+            'uz' => ['title' => "Fransuzcha"],
+            'en' => ['title' => "French"],
         ];
         BookLanguage::create($data);
         $data = [
             'isActive' => 1,
             'created_by' => 1,
             'updated_by' => 1,
-            'uz' => ['title' => "O‘zbekcha&Ruscha"],
-            'en' => ['title' => "Uzbek&Russian"],
+            'uz' => ['title' => "Qozoqcha"],
+            'en' => ['title' => "Kazak"],
+        ];
+        BookLanguage::create($data);
+        $data = [
+            'isActive' => 1,
+            'created_by' => 1,
+            'updated_by' => 1,
+            'uz' => ['title' => "Qoraqalpoq"],
+            'en' => ['title' => "Qoraqalpoq"],
+        ];
+        BookLanguage::create($data);
+        $data = [
+            'isActive' => 1,
+            'created_by' => 1,
+            'updated_by' => 1,
+            'uz' => ['title' => "Arab tili"],
+            'en' => ['title' => "Arab tili"],
         ];
         BookLanguage::create($data);
     }

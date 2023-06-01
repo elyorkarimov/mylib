@@ -50,17 +50,18 @@ class KitobOlishBerish extends Component
 
     protected function addToCartProduct($gtin)
     {
-
+       
         $gtin = trim($gtin);
         if ($gtin != null) {
             $type = null;
             if (strtolower($gtin[0]) == 'f') {
                 $isUser = User::where('inventar_number', '=', $gtin)->first();
-                if ($isUser != null) {
+                
+
+                if (isset($isUser) & $isUser != null) {
                     $this->user = User::where('inventar_number', '=', $gtin)->first();
-
                     $this->debtors = Debtor::where('reader_id', '=', $this->user->id)->where('status', '=', Debtor::$GIVEN)->orderBy('return_time',  'ASC')->get();
-
+                    
                     $type = 'user';
                     $this->isUser = true;
                     $this->userProfile = $this->user->profile;
@@ -71,14 +72,21 @@ class KitobOlishBerish extends Component
                     $this->userProfile = null;
                 }
             } else {
-                $this->book = BookInventar::where('inventar_number', '=', $gtin)->first();
-
-                if ($this->book != null && $this->book->isActive == 1) {
+                 
+                $this->book = BookInventar::where('bar_code', '=', $gtin)->whereNotNull("book_id")->first();
+                 
+                if ($this->book != null && $this->book->isActive == BookInventar::$ACTIVE) {
                     $type = 'book';
                 }
-                if ($this->book != null && $this->book->isActive == 2) {
+                if ($this->book != null && $this->book->isActive == BookInventar::$GIVEN) {
 
                     $this->alert('error', __('The book was taken by another reader!'));
+                    $this->gtin = null;
+                    return;
+                }
+                if ($this->book != null && $this->book->isActive == BookInventar::$WAREHOUSE) {
+
+                    $this->alert('error', __('The book was removed or sent to warehouse!'));
                     $this->gtin = null;
                     return;
                 }
@@ -86,6 +94,7 @@ class KitobOlishBerish extends Component
 
             if ($this->isUser && $type == 'user') {
                 $this->alert('success', __('User has found!'));
+                 
                 $this->gtin = null;
             } elseif ($type == 'book') {
                 if ($this->total_in_cart > 0) {
@@ -144,7 +153,7 @@ class KitobOlishBerish extends Component
             }
             foreach ($this->items as $key => $value) {
                 $qaytarish_vaqti = strtotime(date("Y-m-d") . "+ " . $value['quantity'] . " days");
-
+ 
                 array_push(
                     $finalArray,
                     array(
@@ -215,7 +224,7 @@ class KitobOlishBerish extends Component
             $debtor->returned_time = date("Y-m-d");
             $debtor->updated_by = auth()->user()->id;
             $debtor->save();
-            \App\Models\BookInventar::changeStatus($debtor->id, BookInventar::$ACTIVE);
+            \App\Models\BookInventar::changeStatus($debtor->book_inventar_id, BookInventar::$ACTIVE);
             $this->alert('success', __('Book accepted successfully!'));
             $this->debtors = Debtor::where('reader_id', '=', $this->user->id)->where('status', '=', Debtor::$GIVEN)->orderBy('return_time',  'ASC')->get();
         }
@@ -231,8 +240,7 @@ class KitobOlishBerish extends Component
                     $debtor->returned_time = date("Y-m-d");
                     $debtor->updated_by = auth()->user()->id;
                     $debtor->save();
-                    \App\Models\BookInventar::changeStatus($debtor->id, BookInventar::$ACTIVE);
-                    
+                    \App\Models\BookInventar::changeStatus($debtor->book_inventar_id, BookInventar::$ACTIVE);
                     // $this->debtors = Debtor::where('reader_id', '=', $this->user->id)->where('status', '=', Debtor::$GIVEN)->orderBy('return_time',  'ASC')->get();
                 }
             }

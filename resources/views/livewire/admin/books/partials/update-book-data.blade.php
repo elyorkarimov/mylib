@@ -18,34 +18,8 @@
                         @endif
                         <div class="box box-info padding-1">
                             <div class="box-body">
-                                <div class="form-group">
-                                    <label for="summarka_raqam">{{ __('Summarka Raqam') }}</label>
-                                    <input type="text"
-                                        class="form-control  {{ $errors->has('summarka_raqam') ? ' is-invalid' : '' }}"
-                                        placeholder="{{ __('Summarka Raqam') }}" name="summarka_raqam"
-                                        id="summarka_raqam" wire:model="summarka_raqam">
-                                    {!! $errors->first('summarka_raqam', '<div class="invalid-feedback">:message</div>') !!}
-                                </div>
-                                <div class="form-group">
-                                    <label for="arrived_year">{{ __('Arrived Year') }}</label>
-                                    <input type="number"
-                                        class="form-control  {{ $errors->has('arrived_year') ? ' is-invalid' : '' }}"
-                                        placeholder="{{ __('Arrived Year') }}" name="arrived_year" id="arrived_year"
-                                        wire:model="arrived_year">
-                                    {!! $errors->first('arrived_year', '<div class="invalid-feedback">:message</div>') !!}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
-            <div class="col-xl-5 col-lg-12">
-                <div class="ec-cat-list card card-default mb-24px">
-                    <div class="card-body">
-                        <div class="ec-cat-form">
-
+                                
+                                
                             <div class="form-group">
                                 <label for="organization">{{ __('Organization') }}</label>
                                 @if ($organizations->count() > 0)
@@ -94,6 +68,20 @@
                                 {!! $errors->first('department_id', '<div class="invalid-feedback">:message</div>') !!}
                             </div>
 
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-xl-5 col-lg-12">
+                <div class="ec-cat-list card card-default mb-24px">
+                    <div class="card-body">
+                        <div class="ec-cat-form">
+
+
                             <div class="form-group">
                                 <div class="form-checkbox-box">
                                     <div class="form-check form-check-inline">
@@ -121,10 +109,11 @@
                                     </div>
                                 </div>
                             </div>
+                            
                             <div class="row">
                                 <div class="col-12 box-footer mt20">
                                     <button type="submit" class="btn btn-primary">{{ __('Update') }}</button>
-
+                                    
                                 </div>
                             </div>
                         </div>

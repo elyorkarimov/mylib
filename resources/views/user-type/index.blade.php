@@ -33,8 +33,7 @@
                                     
 									<th>{{ __('Title') }}</th>
 									<th>{{ __('IsActive') }}</th> 
-
-
+									<th>{{ __('User count') }}</th>
 
                                     <th></th>
                                 </tr>
@@ -42,10 +41,10 @@
                             <tbody>
                             @foreach ($userTypes as $userType)
                                     <tr>
-                                        <td>{{ ++$i }}</td>
-                                        								 
+                                        <td>{{ $userType->id }}</td>
                                         <td>{{ $userType->title }}</td>
                                         <td>{!! $userType->isActive == 1 ? '<span class="badge badge-success"><i class="mdi mdi-check-circle"></i></span>' : '<span class="badge badge-danger"><i class="mdi mdi-close-circle "></i></span>' !!}</td>
+                                        <td>{{ $userType->users_count }}</td>
 
                                         <td>
                                             <form action="{{ route('user-types.destroy',[app()->getLocale(), $userType->id]) }}" method="POST">

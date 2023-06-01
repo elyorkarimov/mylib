@@ -31,7 +31,7 @@
                                         placeholder="{{ __("Author's mark") }}" name="authors_mark" id="authors_mark"
                                         wire:model="authors_mark">
                                     {!! $errors->first('authors_mark', '<div class="invalid-feedback">:message</div>') !!}
-                                </div>
+                                </div> 
                                 <div class="form-group">
                                     <label for="dc_published_city">{{ __('Dc Published City') }}</label>
                                     <input type="text"
@@ -49,18 +49,23 @@
                                     {!! $errors->first('dc_publisher', '<div class="invalid-feedback">:message</div>') !!}
                                 </div>
                                 <br>
+                                
 
                                 <div class="form-group">
                                     <label for="author-dropdown">{{ __('Dc Authors') }}</label>
                                     <div wire:ignore>
                                         <select id="author-dropdown"
                                             class=" form-select form-control {{ $errors->has('dc_authors') ? ' is-invalid' : '' }}"
-                                            multiple wire:model="dc_authors">
+                                            multiple wire:model.lazy="dc_authors">
+
                                             @foreach ($bookAuthors as $k => $v)
                                                 <option value="{{ $v }}">{{ $v }}</option>
                                             @endforeach
                                         </select>
                                     </div>
+                                    @php
+                                        // dd($dc_authors);
+                                    @endphp
                                     {!! $errors->first('dc_authors', '<div class="invalid-feedback">:message</div>') !!}
                                 </div>
                                 <br>
@@ -79,14 +84,16 @@
                                     <label for="ISBN">{{ __('ISBN') }}</label>
                                     <input type="text"
                                         class="form-control  {{ $errors->has('ISBN') ? ' is-invalid' : '' }}"
-                                        placeholder="{{ __('ISBN') }}" name="ISBN" id="ISBN" wire:model="ISBN">
+                                        placeholder="{{ __('ISBN') }}" name="ISBN" id="ISBN"
+                                        wire:model="ISBN">
                                     {!! $errors->first('ISBN', '<div class="invalid-feedback">:message</div>') !!}
                                 </div>
+
                                 <div class="form-group">
                                     <label for="dc_description">{{ __('Dc Description') }}</label>
                                     <textarea name="dc_description" class="body form-control" id="dc_description" rows="3"
                                         wire:model.defer="dc_description">
-                                        {{ $dc_description }}
+                                        {{ $dc_description }} 
                                     </textarea>
                                     {!! $errors->first('dc_description', '<div class="invalid-feedback">:message</div>') !!}
                                 </div>
@@ -111,7 +118,7 @@
 
                                 <div class="form-group">
                                     <label for="betlar_soni">{{ __('Betlar Soni') }}</label>
-                                    <input type="number"
+                                    <input type="text"
                                         class="form-control  {{ $errors->has('betlar_soni') ? ' is-invalid' : '' }}"
                                         placeholder="{{ __('Betlar Soni') }}" name="betlar_soni" id="betlar_soni"
                                         wire:model="betlar_soni">
@@ -121,7 +128,8 @@
                                     <label for="price">{{ __('Price') }}</label>
                                     <input type="text"
                                         class="form-control  {{ $errors->has('price') ? ' is-invalid' : '' }}"
-                                        placeholder="{{ __('Price') }}" name="price" id="price" wire:model="price">
+                                        placeholder="{{ __('Price') }}" name="price" id="price"
+                                        wire:model="price">
                                     {!! $errors->first('price', '<div class="invalid-feedback">:message</div>') !!}
                                 </div>
                             </div>
@@ -138,8 +146,10 @@
                             <div class="form-group">
                                 <label for="status" class="form-label">{{ __('IsActive') }}</label>
                                 <select class="form-select" id="status" name="status" wire:model="status">
-                                    <option value='0' {{ $status ? '' : 'selected' }}>{{ __('Passive') }}</option>
-                                    <option value='1' {{ $status ? 'selected' : '' }}>{{ __('Active') }}</option>
+                                    <option value='0' {{ $status ? '' : 'selected' }}>{{ __('Passive') }}
+                                    </option>
+                                    <option value='1' {{ $status ? 'selected' : '' }}>{{ __('Active') }}
+                                    </option>
                                 </select>
                                 @error('status')
                                     <span class="invalid-feedback">{{ $message }}</span>
@@ -380,11 +390,28 @@
             $('#author-dropdown').select2({
                 tags: true,
             });
+            // $("#author-dropdown").append(...@this.get('dc_authors')).trigger('change');
             $('#author-dropdown').on('change', function(e) {
                 let data = $(this).val();
                 @this.set('dc_authors', data);
             });
+            // document.addEventListener('livewire:load', function() {
+            //     $('#author-dropdown').on('select2:close', (e) => {
+            //         @this.emit('locationUsersSelected', $('#author-dropdown').select2('val'));
+            //     });
 
+            //     $('#author-dropdown').val(@this.get('dc_authors')).trigger('change');
+            // });
+            // var serverRenderData = @this.get('dc_authors');
+            // //usually we render data by this way, but select2 will auto sorting
+            // // $("select").val(serverRenderData).trigger('change');
+            // console.log(serverRenderData);
+            // //so we re-append select data
+            // var options = [];
+            // for (var i = 0; i < serverRenderData.length; i++) {
+            //     options.push($("select option[value=" + serverRenderData[i] + "]"));
+            // }
+            // $("#subject-dropdown").append(...options).trigger('change');
             // window.livewire.on('productStore', () => {
             //     $('#author-dropdown').select2({
             // 	    tags: true,

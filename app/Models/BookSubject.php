@@ -49,7 +49,13 @@ class BookSubject extends Model implements TranslatableContract
         return $this->hasMany('App\Models\BookSubjectTranslation', 'book_subject_id', 'id');
     }
     
-    
+    //  /**
+    //  * @return \Illuminate\Database\Eloquent\Relations\hasMany
+    //  */
+    // public function books()
+    // {
+    //     return $this->hasMany('App\Models\Book', 'book_text_id', 'id');
+    // }
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
@@ -129,10 +135,12 @@ class BookSubject extends Model implements TranslatableContract
     public static function GetIdByJsonName($names)
     {
         $ids=[];
-        if($names != null && count(json_decode($names))>0){
+        if($names != "null" && $names != null && count(json_decode($names))>0){
             foreach(json_decode($names) as $k=>$v){
                 $model = self::active()->whereTranslation('title', $v)->first();
-                $ids[$k]=$model->id;
+                if($model != null){
+                    $ids[$k]=$model->id;
+                }
             }
         }
         return $ids;

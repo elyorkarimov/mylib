@@ -62,7 +62,8 @@
                                                         <tr>
                                                             <th class="px-4 px-xl-5">{{ __('Dc Subjects') }}: </th>
                                                             <td class="">
-                                                                @if ($journal->subjects)
+
+                                                                @if ($journal->subjects != null && $journal->subjects != "null" && $journal->subjects)
                                                                     | @foreach (json_decode($journal->subjects) as $key => $value)
                                                                         {{ \App\Models\BookSubject::GetTitleById($value) }} |
                                                                     @endforeach

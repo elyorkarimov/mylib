@@ -25,9 +25,9 @@
                         @csrf
                         <div class="row">
                             <div class="form-group col-md-12 mb-4">
-                                <label for="email" class="col-md-4 col-form-label text-md-start">{{ __('Email') }}</label>
-                                <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus placeholder="{{ __('Email') }}">
-                                @error('email')
+                                <label for="login" class="col-md-4 col-form-label text-md-start">{{ __('Login') }}</label>
+                                <input id="login" type="text" class="form-control @error('login') is-invalid @enderror" name="login" value="{{ old('login') }}" required autocomplete="login" autofocus placeholder="{{ __('Login') }}">
+                                @error('login')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
                                     </span>
@@ -66,12 +66,15 @@
                                 <button type="submit" class="btn btn-primary btn-block mb-4">
                                     {{ __('Login') }}
                                 </button>
+                                @if (Route::has('register'))
                                 <p class="sign-upp">                            
                                     {{ __("Don't have an account yet?") }}
                                     <a class="text-blue" href="{{ url(app()->getLocale() . '/register') }}">
                                         {{ __('Sign Up') }}
                                     </a>
                                 </p>
+
+                                @endif
                             </div>
                         </div>
                     </form>

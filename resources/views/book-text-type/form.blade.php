@@ -18,9 +18,10 @@
 
                     </ul>
                     <div class="tab-content px-3 px-xl-5" id="myTabContent">
- 
+
                         @php
                             $step = 0;
+                            
                         @endphp
                         @foreach (config('app.locales') as $k => $locale)
                             <div class="tab-pane fade {{ $k == 'uz' ? 'active show' : '' }}"
@@ -29,22 +30,23 @@
                                 <div class="tab-widget mt-5">
                                     <div class="row">
                                         <div class="col-md-12">
-                                            <input type="hidden" class="form-control " name="locale_{{ $k }}"
-                                                id="locale_{{ $k }}" value="{{ $k }}" />
+                                            <input type="hidden" class="form-control "
+                                                name="locale_{{ $k }}" id="locale_{{ $k }}"
+                                                value="{{ $k }}" />
                                             <div class="form-group">
                                                 <label class="required"
                                                     for="title_{{ $k }}">{{ __('Title') }}
                                                     {{ $k }}:</label>
                                                 @php
                                                     $title = null;
-                                                     if (count($bookTextType->bookTextTypeTranslations) > 0 && $bookTextType->bookTextTypeTranslations[$step]->locale == $k) {
+                                                    if (count($bookTextType->bookTextTypeTranslations) > 0 && isset($bookTextType->bookTextTypeTranslations[$step]) && $bookTextType->bookTextTypeTranslations[$step]->locale == $k) {
                                                         $title = $bookTextType->bookTextTypeTranslations[$step]->title;
                                                     }
                                                     $step++;
                                                 @endphp
-                                                <input type="text" class="form-control " name="title_{{ $k }}"
-                                                    id="title_{{ $k }}" placeholder="{{ __('Title') }}"
-                                                    value="{{ $title }}" />
+                                                <input type="text" class="form-control "
+                                                    name="title_{{ $k }}" id="title_{{ $k }}"
+                                                    placeholder="{{ __('Title') }}" value="{{ $title }}" />
                                                 @error('title_{{ $k }}')
                                                     <span class="text-danger">{{ $message }}</span>
                                                 @enderror
@@ -77,12 +79,12 @@
                 <div class="ec-cat-form">
                     @php
                         $isActive = 1;
-                        if ($bookTextType->count() > 0 && isset($bookTextType->isActive)){
+                        if ($bookTextType->count() > 0 && isset($bookTextType->isActive)) {
                             $isActive = $bookTextType->isActive;
                         }
-
+                        
                     @endphp
-                   
+
                     <div class="form-group row">
 
                         <label for="isActive" class="form-label">{{ __('isActive') }}</label>
@@ -105,4 +107,3 @@
     </div>
 
 </div>
- 

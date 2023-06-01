@@ -33,6 +33,8 @@
                                     <th>{{ __('Organization') }}</th>
                                     <th>{{ __('Title') }}</th>
                                     <th>{{ __('IsActive') }}</th> 
+                                    <th>{{ __('Number of books') }}</th>
+                                    <th>{{ __('Books in Copy') }}</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -62,6 +64,8 @@
                                     @error('status')
                                         <span class="invalid-feedback">{{ $message }}</span>
                                     @enderror</td> 
+                                    <td></td>
+                                    <td></td>
                                     <td>
                                         <a href="{{ route('branches.index', app()->getLocale()) }}"
                                             class="btn btn-sm btn-info">{{ __('Clear') }}</a>
@@ -76,10 +80,15 @@
                                         <td>{{ ++$i }}</td>
                                         <td>{!! $branch->organization_id ? $branch->organization->title : '' !!}</td>
 
-                                            <td>{{ $branch->title }}</td>
-                                            <td>{!! $branch->isActive == 1 ? '<span class="badge badge-success"><i class="mdi mdi-check-circle"></i></span>' : '<span class="badge badge-danger"><i class="mdi mdi-close-circle "></i></span>' !!}</td>
-    
+                                        <td>{{ $branch->title }}</td>
+                                        <td>{!! $branch->isActive == 1 ? '<span class="badge badge-success"><i class="mdi mdi-check-circle"></i></span>' : '<span class="badge badge-danger"><i class="mdi mdi-close-circle "></i></span>' !!}</td>
 
+                                        <td>
+                                            {{ $branch->book->count() }}
+                                        </td>
+                                        <td>
+                                            {{ $branch->bookInventar->count() }}
+                                        </td>
                                         <td>
                                             <form action="{{ route('branches.destroy',[app()->getLocale(), $branch->id]) }}" method="POST">
                                                 <a class="btn btn-sm btn-primary " href="{{ route('branches.show', [app()->getLocale(), $branch->id]) }}"> {{ __('Show') }}</a>
@@ -88,6 +97,17 @@
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-danger btn-sm">{{ __('Delete') }}</button>
                                             </form>
+                                            @if (Auth::user()->hasRole('SuperAdmin'))
+                                                <br>
+                                                <form method="POST"
+                                                    action="{{ route('branches.delete', [app()->getLocale(), 'id' => $branch->id]) }}">
+                                                    @csrf
+                                                    <input name="type" type="hidden" value="DELETE">
+                                                    <button type="submit"
+                                                        class="btn btn-sm btn-danger btn-flat show_confirm"
+                                                        data-toggle="tooltip">{{ __('Delete from DataBase') }}</button>
+                                                </form>
+                                            @endif
                                         </td>
                                     </tr>
                                 @endforeach                                    

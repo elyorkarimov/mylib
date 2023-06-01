@@ -131,5 +131,19 @@ class Branch extends Model implements TranslatableContract
     }
 
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function bookInventar()
+    {
+        return $this->hasMany('App\Models\BookInventar', 'branch_id', 'id');
+    }
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function book()
+    {
+        return $this->hasMany('App\Models\Book', 'branch_id', 'id');
+    }
 
 }

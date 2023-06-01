@@ -36,11 +36,18 @@ class BookInventar extends Model
     public static $DELETED = 0;
     public static $ACTIVE = 1;
     public static $GIVEN = 2;
-    // depozitoriyaga
+    // depozitoriyaga depozitariyga
     public static $WAREHOUSE = 3;
 
+    public static $TYPE_UK = 0;
+    public static $TYPE_SOVGA = 1;//sovg'a kitoblar
+    public static $TYPE_INVENTAR = 2;//inventar kitoblar
+    public static $TYPE_DROP = 3;//dropli kitoblar
+    public static $TYPE_NUMLESS = 4;//raqamsiz kitoblar
+    public static $TYPE_NUMLESS_SECOND = 5;//raqamsiz kitoblar
+
     static $rules = [
-		'inventar_number' => 'required',
+        'inventar_number' => 'required',
     ];
 
 
@@ -49,7 +56,7 @@ class BookInventar extends Model
      *
      * @var array
      */
-    protected $fillable = ['isActive','comment','inventar_number','book_id','book_information_id', 'organization_id', 'branch_id','deportmetn_id','created_by','updated_by','key', 'bar_code', 'inventar'];
+    protected $fillable = ['isActive', 'comment', 'inventar_number', 'book_id', 'book_information_id', 'organization_id', 'branch_id', 'deportmetn_id', 'created_by', 'updated_by', 'key', 'bar_code', 'inventar'];
 
 
     /**
@@ -59,7 +66,7 @@ class BookInventar extends Model
     {
         return $this->hasOne('App\Models\Book', 'id', 'book_id');
     }
-    
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
@@ -82,7 +89,7 @@ class BookInventar extends Model
     {
         return $this->hasOne('App\Models\Branch', 'id', 'branch_id');
     }
-    
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
@@ -90,8 +97,8 @@ class BookInventar extends Model
     {
         return $this->hasOne('App\Models\Department', 'id', 'deportmetn_id');
     }
-    
-   /**
+
+    /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
     public function updatedBy()
@@ -127,27 +134,82 @@ class BookInventar extends Model
             $model->updated_by = Auth::id();
         });
     }
-    
-    public static function changeStatus($id, $status=null)
-    {   
-        $model=self::find($id);
-        $model->isActive=$status;
+
+    public static function changeStatus($id, $status = null)
+    {
+
+        $model = self::find($id);
+        $model->isActive = $status;
         $model->save();
         return $model;
+    }
+
+    public static function generateInventars($book_id, $book_information_id, $branch_id, $deportmetn_id, $organization_id, $copies = 0)
+    {
+        if ($copies > 0) {
+            $last = self::orderBy('id', 'desc')->limit(1)->firstOrFail();
+             
+            $lN =filter_var($last->bar_code, FILTER_SANITIZE_NUMBER_INT);
+           
+            for($i=1; $i<=$copies; $i++){
+                $lN +=1;
+                $inventarData = [
+                    'isActive' => true,
+                    'book_id' => $book_id,
+                    'book_information_id' => $book_information_id,
+                    'organization_id' => $organization_id,
+                    'branch_id' => $branch_id,
+                    'deportmetn_id' => $deportmetn_id,
+                    'key' => null,
+                    'bar_code' => $lN,
+                    'inventar_number' => $lN,
+                    'inventar' => $lN,
+                ];
+                 $bookInventar = BookInventar::where('bar_code', '=', $lN)->first();
+
+                if ($bookInventar == null) {
+                    $bookInventar = BookInventar::create($inventarData);
+                }
+
+            }
+        }
     }
 
     public static function GetStatus($status)
     {
 
-        if($status==self::$GIVEN){
-            return "<span class='btn btn-sm btn-primary'>".__("GIVEN")."</span>"; 
-        }elseif($status==self::$ACTIVE){
-            return "<span class='btn btn-sm btn-success'>".__("Active")."</span>"; 
-        }elseif($status==self::$DELETED){
-            return '<span class="badge badge-danger">'.__("DELETED").'</span>';
+        if ($status == self::$GIVEN) {
+            return "<span class='btn btn-sm btn-primary'>" . __("GIVEN") . "</span>";
+        } elseif ($status == self::$ACTIVE) {
+            return "<span class='btn btn-sm btn-success'>" . __("Active") . "</span>";
+        } elseif ($status == self::$DELETED) {
+            return '<span class="badge badge-danger">' . __("DELETED") . '</span>';
+        } elseif ($status == self::$WAREHOUSE) {
+            return '<span class="badge badge-danger">' . __("WAREHOUSED") . '</span>';
         }
         return __("UNKNOWN");
-
     }
 
+
+    
+    public static function GetInventarsByBookId($id)
+    {
+        $inventars = self::where('book_id', '=', $id)->get();
+        
+        if ($inventars != null) {
+            $data="";
+            foreach($inventars as $k=>$inventar){
+                $data.=$inventar->bar_code.', ';
+            }
+            return rtrim($data, ', ');
+        }
+        return null;
+    } 
+    public static function GetInventarsCountByBookId($id)
+    {
+        $inventars = self::where('book_id', '=', $id)->get();
+        
+        
+        return $inventars->count();
+    }
 }

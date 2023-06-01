@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
@@ -29,7 +30,26 @@ class LoginController extends Controller
      */
     // protected $redirectTo = RouteServiceProvider::HOME;
     protected $redirectTo = '/home';
-
+    // protected function validateLogin(Request $request)
+    // {
+    //     $request->validate([
+    //         // 'email' => 'required|email',
+    //         'login' => 'required|string',
+    //         'password' => 'required|string',
+    //     ]);
+       
+    // }
+    /**
+     * Get the login username to be used by the controller.
+     *
+     * @return string
+     */
+    public function username()
+    {
+        
+        return 'login';
+    }
+    
     /**
      * Create a new controller instance.
      *
@@ -43,14 +63,14 @@ class LoginController extends Controller
     {
         $roles = Auth::user()->getRoleNames()->toArray();
 
-        if (in_array("SuperAdmin", $roles) || in_array("Admin", $roles) || in_array("Manager", $roles)) {
+        if (in_array("SuperAdmin", $roles) || in_array("Admin", $roles) || in_array("Manager", $roles) || in_array("Accountant", $roles)) {
             return app()->getLocale() . '/home';
         } elseif (in_array("Author", $roles)) {
             return app()->getLocale() . '/admin/sisauthor';
         } elseif (in_array("Reader", $roles)) {
-            return app()->getLocale() . '/admin/reader';
+            return app()->getLocale() . '/admin/home';
         }elseif (in_array("User", $roles)) {
-            return app()->getLocale() . '/admin/usreader';
+            return app()->getLocale() . '/admin/home';
         }
         // return app()->getLocale() . '/home';
     }

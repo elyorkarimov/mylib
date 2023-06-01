@@ -11,7 +11,12 @@
     <a href="{{ url(app()->getLocale() . '/admin/breader') }}"
         class="sidenav-item-link ">
         <i class="mdi mdi-bookshelf"></i>
-        <span class="nav-text">{{ __('Books') }}</span>
+        <span class="nav-text">{{ __('Order books') }}</span>
     </a>
 </li>
-
+<li class="{{ \Request::is(app()->getLocale() . '/admin/myorders*') ? 'active' : '' }}">
+    <a href="{{ url(app()->getLocale() . '/admin/myorders') }}" class="sidenav-item-link ">
+        <i class="mdi mdi-refresh"></i>
+        <span class="nav-text">{{ __('My Orders') }}</span>
+    </a>
+</li>

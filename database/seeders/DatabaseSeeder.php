@@ -16,7 +16,8 @@ class DatabaseSeeder extends Seeder
         // \App\Models\User::factory(10)->create();
         $this->call([
             OrganizationSeeder::class,
-            CreateAdminUserSeeder::class,
+            BranchesTableSeeder::class,
+
             PermissionTableSeeder::class,
             UserTypesTableSeeder::class,
             BookTypesSeeder::class,
@@ -27,6 +28,10 @@ class DatabaseSeeder extends Seeder
             BookFileTypesSeeder::class,
             BookSubjectsSeeder::class,
             GenderssSeeder::class,
+
+            FacultiesSeeder::class,
+            CreateAdminUserSeeder::class,
+
         ]);
     }
 }

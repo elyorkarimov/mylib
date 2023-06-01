@@ -87,6 +87,14 @@ class Group extends Model
         return $this->hasOne('App\Models\Department', 'id', 'department_id');
     }
 
+      /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function profiles()
+    {
+        return $this->hasMany('App\Models\UserProfile', 'group_id', 'id');
+    }
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */

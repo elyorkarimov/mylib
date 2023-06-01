@@ -37,7 +37,7 @@
                                                     {{ $k }}:</label>
                                                 @php
                                                     $title = null;
-                                                     if (count($branch->branchTranslations) > 0 && $branch->branchTranslations[$step]->locale == $k) {
+                                                     if (count($branch->branchTranslations) > 0 && isset($branch->branchTranslations[$step]) && $branch->branchTranslations[$step]->locale == $k) {
                                                         $title = $branch->branchTranslations[$step]->title;
                                                     }
                                                     $step++;

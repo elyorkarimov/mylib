@@ -37,7 +37,7 @@
                                                     {{ $k }}:</label>
                                                 @php
                                                     $title = null;
-                                                     if (count($bookLanguage->bookLanguageTranslations) > 0 && $bookLanguage->bookLanguageTranslations[$step]->locale == $k) {
+                                                     if (count($bookLanguage->bookLanguageTranslations) > 0 && isset($bookLanguage->bookLanguageTranslations[$step]) && $bookLanguage->bookLanguageTranslations[$step]->locale == $k) {
                                                         $title = $bookLanguage->bookLanguageTranslations[$step]->title;
                                                     }
                                                     $step++;

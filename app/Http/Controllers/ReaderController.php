@@ -43,7 +43,7 @@ class ReaderController extends Controller
         $perPage = 20;
         $debtors = Debtor::where('reader_id', '=', $user_id)->where('status', '=', Debtor::$GIVEN)->orderBy('return_time', 'ASC')->paginate($perPage);
         // $debtors = Debtor::whereNull('qaytargan_vaqti')->groupBy('kitobxon_id')->orderBy('qaytarish_vaqti', 'asc')->paginate();
- 
+        
         // dd($debtors);groupBy('reader_id')->
         return view('reader.index', compact('debtors'))
             ->with('i', (request()->input('page', 1) - 1) * $debtors->perPage());

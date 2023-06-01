@@ -37,7 +37,7 @@
                                                     {{ $k }}:</label>
                                                 @php
                                                     $title = null;
-                                                     if (count($referenceGender->referenceGenderTranslations) > 0 && $referenceGender->referenceGenderTranslations[$step]->locale == $k) {
+                                                     if (count($referenceGender->referenceGenderTranslations) > 0 && isset($referenceGender->referenceGenderTranslations[$step]) && $referenceGender->referenceGenderTranslations[$step]->locale == $k) {
                                                         $title = $referenceGender->referenceGenderTranslations[$step]->title;
                                                     }
                                                     $step++;

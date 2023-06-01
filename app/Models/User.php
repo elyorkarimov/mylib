@@ -23,7 +23,9 @@ class User extends Authenticatable
         'email',
         'password',
         'status',
-        'inventar_number'
+        'inventar_number',
+        'inventar',
+        'login'
     ];
 
     /**
@@ -49,12 +51,20 @@ class User extends Authenticatable
     {
         return $query->where('status', 1);
     }
-      /**
+    /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
     public function profile()
     {
         return $this->hasOne('App\Models\UserProfile', 'user_id', 'id');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function profiles()
+    {
+        return $this->hasMany(UserProfile::class);
     }
     
 }

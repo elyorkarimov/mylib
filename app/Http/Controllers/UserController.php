@@ -2,16 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Charts\GenderChart;
+use App\Imports\UsersImport;
+use App\Jobs\ProcessImportUsers;
 use App\Models\Branch;
 use App\Models\Department;
 use App\Models\Organization;
 use DB;
 use Hash;
 use App\Models\User;
+use App\Models\UserProfile;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
+use Barryvdh\DomPDF\Facade\Pdf; 
+use Maatwebsite\Excel\Facades\Excel; 
 
 class UserController extends Controller
 {
@@ -45,9 +52,26 @@ class UserController extends Controller
      */
     public function index($language, Request $request)
     {
-        $show_accardion=false; 
 
+        // $today_users = User::whereDate('created_at', today())->count();
+        // $yesterday_users = User::whereDate('created_at', today()->subDays(1))->count();
+        // $users_2_days_ago = User::whereDate('created_at', today()->subDays(2))->count();
 
+        $data = UserProfile::select('gender_id', \DB::raw("count(gender_id) as count"))->whereNotNull('gender_id')->groupBy('gender_id')
+            ->get();
+        $chart = new GenderChart;
+        // $chart->labels(['Erkak', 'Ayol']);
+        // $chart->dataset('My dataset', 'line', $data);
+        // dd($data);
+        $chart->labels($data->keys());
+        $chart->dataset('My dataset', 'pie', [265, 365]);
+
+        // dispatch(new ProcessImportUsers());
+
+        // Excel::queueImport(new UsersImport, 'users.xlsx');
+        // Excel::queueImport(new UsersImport, 'users.xlsx');
+        
+        $show_accardion=false;
 
         // $roles = Auth::user()
         //     ->getRoleNames()
@@ -61,6 +85,10 @@ class UserController extends Controller
         //     // dd($data);
         //     // dd(Auth::user()->profile);
         // }
+        $from = trim($request->get('from'));
+        $to = trim($request->get('to'));
+
+        $page = trim($request->get('page'));
         $keyword = trim($request->get('keyword'));
         $inventar_number = trim($request->get('inventar_number'));
         $name = trim($request->get('name'));
@@ -69,6 +97,10 @@ class UserController extends Controller
         $organization_id = trim($request->get('organization_id'));
         $branch_id = trim($request->get('branch_id'));
         $department_id = trim($request->get('department_id'));
+        $faculty_id = trim($request->get('faculty_id'));
+        $chair_id = trim($request->get('chair_id'));
+        $group_id = trim($request->get('group_id'));
+
         $roles = Role::all();
         
         $organizations = Organization::active()->translatedIn(app()->getLocale())->listsTranslations('title')->pluck('title', 'id');
@@ -77,6 +109,30 @@ class UserController extends Controller
 
         // $data = User::orderBy('id', 'desc')->paginate(20);
         $q = User::query();
+
+
+        if (!empty($from) && !empty($to)) {
+            // intval(substr('' . trim($request->get('from'))
+            $q->orWhereBetween('inventar', [$from, $to]);
+            // $q->orWhere(function($query) use ($from, $to){
+            //     $query->whereBetween('id', [intval($from),intval($to)])
+            //           ->orWhereBetween('id', [intval($from),intval($to)]);
+            //   });
+            $show_accardion=true;
+
+        }
+        
+        if (!empty($from)) {
+            $show_accardion=true;
+
+            $q->orWhere('inventar', '=', $from);
+        } 
+        if (!empty($to)) {
+            $show_accardion=true;
+
+            $q->orWhere('inventar', '=', $to);
+        }
+
         if($name != null){
             $q->orWhere('name', 'LIKE', "%$name%");
         }
@@ -101,12 +157,89 @@ class UserController extends Controller
             ->orWhere('email', 'LIKE', "%$keyword%")
             ->orWhere('name', 'LIKE', "%$keyword%");
         }
-        $data = $q->with('profile')->orderBy('id', 'desc')->paginate(20);
+        if($organization_id != null && $organization_id>0){
+            $show_accardion=true;
+            $q->with('profile')
+            ->whereHas('profile', function (Builder $query) use($organization_id){
+                $query->where('organization_id', '=', $organization_id);
+            });
+        }
+        
+        if($branch_id != null && $branch_id>0){
+            $show_accardion=true;
+            $q->with('profile')
+            ->whereHas('profile', function (Builder $query) use($branch_id){
+                $query->where('branch_id', '=', $branch_id);
+            });
+        }
+
+        if($department_id != null && $department_id>0){
+            $show_accardion=true;
+            $q->with('profile')
+            ->whereHas('profile', function (Builder $query) use($department_id){
+                $query->where('department_id', '=', $department_id);
+            });
+        }
+        if($faculty_id != null && $faculty_id>0){
+            $show_accardion=true;
+            $q->with('profile')
+            ->whereHas('profile', function (Builder $query) use($faculty_id){
+                $query->where('faculty_id', '=', $faculty_id);
+            });
+        }
+        if($chair_id != null && $chair_id>0){
+            $show_accardion=true;
+            $q->with('profile')
+            ->whereHas('profile', function (Builder $query) use($chair_id){
+                $query->where('chair_id', '=', $chair_id);
+            });
+        }
+        if($group_id != null && $group_id >0){
+            $show_accardion=true;
+            $q->with('profile')
+            ->whereHas('profile', function (Builder $query) use($group_id){
+                $query->where('group_id', '=', $group_id);
+            });
+        }
+
+
+        $data = $q->with('roles')->orderBy('id', 'desc')->paginate(20);
         
 
-        return view('users.index', compact('data', 'name', 'email', 'roles', 'role_id', 'inventar_number', 'show_accardion', 'keyword', 'organizations', 'branches', 'departments', 'department_id', 'organization_id', 'branch_id'));
+        return view('users.index', compact('chart', 'data', 'name', 'email', 'roles', 'role_id', 'inventar_number', 'show_accardion', 'keyword', 'organizations', 'branches', 'departments', 'department_id', 'organization_id', 'branch_id', 'faculty_id', 'chair_id', 'group_id', 'page', 'from', 'to'));
     }
 
+    /**
+     * Display the specified resource.
+     *
+     * @param  int $id
+     * @return \Illuminate\Http\Response
+     */
+    public function printinventar($language, $id,  Request $request)
+    {
+        $from = trim($request->get('from'));
+        $to = trim($request->get('to'));
+        if (!empty($from) && !empty($to)) {
+            // intval(substr('' . trim($request->get('from'))
+            $bookInventars = User::whereBetween('inventar_number', [intval($from), intval($to)])
+                ->get();
+                        // $customPaper = array(0,0,720,1440);
+            
+            // $pdf = Pdf::loadView('pdf.inventarall', compact('bookInventars'));     
+            // return $pdf->download('invoices.pdf');
+            return view('pdf.inventaruserall', compact('bookInventars'));
+        } else {
+            $user = User::find($id);
+            if($user->inventar_number!=null){
+                return view('pdf.inventaroneuser', compact('user'));
+            }else{
+                toast(__('User does not has inventar number'), 'success');
+
+                return redirect()->route('users.index', app()->getLocale())
+                    ->with('success', 'User does not has inventar number');
+            }
+        }
+    }
     /**
      * Show the form for creating a new resource.
      *
@@ -188,22 +321,125 @@ class UserController extends Controller
      */
     public function card($language, Request $request)
     {
-        $id = trim($request->get('userid'));
+         $id = trim($request->get('userid'));
+ 
+       
+        $keyword = trim($request->get('keyword'));
+        $inventar_number = trim($request->get('inventar_number'));
 
         $from = trim($request->get('from'));
         $to = trim($request->get('to'));
+        $name = trim($request->get('name'));
+        $email = trim($request->get('email'));
+        $role_id = trim($request->get('role_id'));
+        $organization_id = trim($request->get('organization_id'));
+        $branch_id = trim($request->get('branch_id'));
+        $department_id = trim($request->get('department_id'));
+        $faculty_id = trim($request->get('faculty_id'));
+        $chair_id = trim($request->get('chair_id'));
+        $group_id = trim($request->get('group_id'));
+ 
+        // $data = User::orderBy('id', 'desc')->paginate(20);
+        $q = User::query();
+
+        
         if (!empty($from) && !empty($to)) {
-            $user = User::with(['profile'])
-                ->whereHas('profile', function ($q) use ($from, $to) {
-                    $q->whereBetween('raqami', [intval(substr('' . $from, -4)), intval(substr('' . $to, -4))]); // '=' is optional
-                })->get();
+            // intval(substr('' . trim($request->get('from'))
+            $q->orWhereBetween('inventar', [$from, $to]);
+             
+
         }
-        if (!empty($id)) {
-            $user = User::where('id', '=', $id)->get();
-            // $user = User::find($id);
+        
+        if (!empty($from)) { 
+
+            $q->orWhere('inventar', '=', $from);
+        } 
+        if (!empty($to)) { 
+
+            $q->orWhere('inventar', '=', $to);
         }
 
-        return view('pdf.usercard', array('users' => $user));
+        if($name != null){
+            $q->orWhere('name', 'LIKE', "%$name%");
+        }
+        if($email != null){
+            $q->orWhere('email', 'LIKE', "%$email%");
+        }
+        if($inventar_number != null){
+            $q->orWhere('inventar_number', 'LIKE', "%$inventar_number%");
+        }
+
+        if (!empty($role_id)) {
+            $model_roles = DB::table('model_has_roles')->select('model_id')->where('role_id', $role_id)->get();
+            $user_id = [];
+            foreach ($model_roles as $k => $v) {
+                $user_id[$k] = $v->model_id;
+            }
+            $users = $q->whereIn('id', $user_id);
+        }
+        if($keyword != null){
+            $show_accardion=true;
+            $q->where('inventar_number', 'LIKE', "%$keyword%")
+            ->orWhere('email', 'LIKE', "%$keyword%")
+            ->orWhere('name', 'LIKE', "%$keyword%");
+        }
+        if($organization_id != null && $organization_id>0){
+             $q->with('profile')
+            ->whereHas('profile', function (Builder $query) use($organization_id){
+                $query->where('organization_id', '=', $organization_id);
+            });
+        }
+        
+        if($branch_id != null && $branch_id>0){
+             $q->with('profile')
+            ->whereHas('profile', function (Builder $query) use($branch_id){
+                $query->where('branch_id', '=', $branch_id);
+            });
+        }
+
+        if($department_id != null && $department_id>0){
+             $q->with('profile')
+            ->whereHas('profile', function (Builder $query) use($department_id){
+                $query->where('department_id', '=', $department_id);
+            });
+        }
+        if($faculty_id != null && $faculty_id>0){
+             $q->with('profile')
+            ->whereHas('profile', function (Builder $query) use($faculty_id){
+                $query->where('faculty_id', '=', $faculty_id);
+            });
+        }
+        if($chair_id != null && $chair_id>0){
+             $q->with('profile')
+            ->whereHas('profile', function (Builder $query) use($chair_id){
+                $query->where('chair_id', '=', $chair_id);
+            });
+        }
+        if($group_id != null && $group_id >0){
+             $q->with('profile')
+            ->whereHas('profile', function (Builder $query) use($group_id){
+                $query->where('group_id', '=', $group_id);
+            });
+        }
+
+        if (!empty($id)) {
+             
+            // $users = User::take(61)->get();
+            // $user = User::find($id);
+            $q->orWhere('id', '=', $id);
+
+        }
+        $users = $q->orderBy('id', 'desc')->paginate(20);
+        
+        //  $pdf = PDF::loadView('pdf.cards', array('users' => $users));
+    
+        // return $pdf->download('itsolutionstuff.pdf');
+
+        // $pdf = Pdf::loadView('pdf.cards', compact('users'));
+        
+        // return $pdf->download('cards.pdf');
+
+        return view('pdf.cards', array('users' => $users));
     }
 
     /**
@@ -250,6 +486,7 @@ class UserController extends Controller
         $user->update($input);
         DB::table('model_has_roles')->where('model_id', $user->id)->delete();
         $user->assignRole($request->input('roles'));
+        toast(__('User updated successfully.'), 'success');
 
         return redirect()->route('users.index', app()->getLocale())
             ->with('success', 'User updated successfully.');
@@ -261,14 +498,37 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($language, $id)
     {
         // User::find($id)->delete();
-        $user = User::find($id);
-        $user->status = false;
-        $user->save();
+        $user = User::find($id); 
+        $user->status = 0;
+        $user->save(); 
+        toast(__('User deleted successfully.'), 'success');
 
-        return redirect()->route('users.index')
+        return redirect()->route('users.index', app()->getLocale())
             ->with('success', 'User deleted successfully.');
+    }
+    /**
+     * Write code on Method
+     *
+     * @return response()
+     */
+    public function delete($language, $id, Request $request)
+    {
+        $type=$request->input('type');
+        
+        // BooksType::find($id)->delete();
+        $user= User::find($id);
+        if($type=='DELETE'){
+            User::find($id)->delete();
+            UserProfile::where('user_id', '=', $id)->delete();
+            // $booksType->isActive=false;
+            // $booksType->Save();
+            toast(__('Deleted successfully.'), 'info');
+            return back();    
+        }else{
+            return view('users.show', compact('user'));
+        }
     }
 }

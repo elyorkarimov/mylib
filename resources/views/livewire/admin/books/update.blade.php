@@ -61,6 +61,7 @@
                                     <input type="text"  class="form-control  {{($errors->has('ISBN') ? ' is-invalid' : '')}}" placeholder="{{__('ISBN')}}" name="ISBN" id="ISBN" wire:model.defer="ISBN">
                                     {!! $errors->first('ISBN', '<div class="invalid-feedback">:message</div>') !!}
                                 </div>
+                                
                                 <div class="form-group">
                                     <label for="dc_description">{{ __('Dc Description') }}</label>
                                     <textarea name="dc_description" class="body form-control" id="dc_description"  rows="3" wire:model.defer="dc_description">

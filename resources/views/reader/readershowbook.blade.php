@@ -8,11 +8,11 @@
     <div class="content">
         <div class="breadcrumb-wrapper breadcrumb-contacts">
             <div>
-                <h1>{{ __('Books') }}</h1>
+                <h1>{{ __('Order books') }}</h1>
                 <p class="breadcrumbs">
                     <span><a href="{{ route('admin.home', app()->getLocale()) }}">{{ __('Home') }}</a></span>
                     <span><i class="mdi mdi-chevron-right"></i><a
-                            href="{{ url(app()->getLocale() . '/admin/breader') }}">{{ __('Books') }}</a></span>
+                            href="{{ url(app()->getLocale() . '/admin/breader') }}">{{ __('Order books') }}</a></span>
                     <span><i class="mdi mdi-chevron-right"></i></span> {{ $book->title ?? __('Show') }}
                 </p>
             </div>
@@ -41,7 +41,8 @@
                                     <div class="form-group">
                                         <strong>{{ __('Dc Subjects') }}:</strong>
                                         @php
-                                            if ($book->dc_subjects) {
+                                            if ($book->dc_subjects != "null" && $book->dc_subjects != null){
+
                                                 foreach (json_decode($book->dc_subjects) as $key => $value) {
                                                     echo $key + 1 . ') ' . $value . ', ';
                                                 }

@@ -115,8 +115,39 @@
 
     <br>
     <livewire:site.main.books-by-category />
-    {{-- <embed src="/storage/books/fulltext/FwuRzGsSHKO7A3UNG1XNf1Pc5eFnDUbOha7UcuXH.pdf#toolbar=0&navpanes=0&scrollbar=0" type="application/pdf" width="100%" height="800px"  alt="pdf" /> --}}
- 
+
+    @if ($topBooks != null && $topBooks->count() > 0)
+        <section class="space-bottom-3">
+            <div class="container">
+                <header class="mb-5 d-md-flex justify-content-between align-items-center">
+                    <h2 class="font-size-7 mb-3 mb-md-0">{{ __('The most demandable books') }}</h2>
+                </header>
+                <div class="js-slick-carousel u-slick products border"
+                    data-pagi-classes="text-center u-slick__pagination mt-md-8 mt-4 position-absolute right-0 left-0"
+                    data-slides-show="3"
+                    data-responsive='[{
+                    "breakpoint": 992,
+                    "settings": {
+                        "slidesToShow": 2
+                    }
+                    }, {
+                    "breakpoint": 768,
+                    "settings": {
+                        "slidesToShow": 1
+                    }
+                    }, {
+                    "breakpoint": 554,
+                    "settings": {
+                        "slidesToShow": 1
+                    }
+                    }]'>
+                    @foreach ($topBooks as $k => $item)
+                        {!! \App\Models\Book::GetBookTopTemplateById($item->book_id) !!}
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
 
     @if ($journals != null && $journals->count() > 0)
         <section class="space-bottom-3">
@@ -132,7 +163,8 @@
                     data-arrows-classes="d-none d-xl-block u-slick__arrow u-slick__arrow-centered--y"
                     data-arrow-left-classes="fas fa-chevron-left u-slick__arrow-inner u-slick__arrow-inner--left ml-lg-n10"
                     data-arrow-right-classes="fas fa-chevron-right u-slick__arrow-inner u-slick__arrow-inner--right mr-lg-n10"
-                    data-slides-show="5" data-responsive='[{
+                    data-slides-show="5"
+                    data-responsive='[{
                                                    "breakpoint": 1500,
                                                    "settings": {
                                                      "slidesToShow": 4
@@ -205,7 +237,7 @@
             </div>
         </section>
     @endif
- 
+
     @if ($magazines != null && $magazines->count() > 0)
         <section class="space-bottom-3">
             <header class="mb-4 container">
@@ -214,7 +246,8 @@
             <div class="container">
                 <div class="tab-content" id="featuredBooksContent">
                     <div class="tab-pane fade show active" id="featured" role="tabpanel" aria-labelledby="featured-tab">
-                        <ul class="products list-unstyled row no-gutters row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-wd-6 border-top border-left my-0">
+                        <ul
+                            class="products list-unstyled row no-gutters row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-wd-6 border-top border-left my-0">
                             @foreach ($magazines as $magazine)
                                 <li class="product col">
                                     <div class="product__inner overflow-hidden p-3 p-md-4d875">
@@ -226,13 +259,11 @@
                                                     @if ($magazine->image_path)
                                                         <img src="/storage/magazineIssues/photo/{{ $magazine->image_path }}"
                                                             class="img-fluid d-block mx-auto attachment-shop_catalog size-shop_catalog wp-post-image img-fluid"
-                                                            alt="{{ $magazine->title }}"
-                                                            title="{{ $magazine->title }}">
+                                                            alt="{{ $magazine->title }}" title="{{ $magazine->title }}">
                                                     @else
                                                         <img src="/book_no_photo.jpg"
                                                             class="img-fluid d-block mx-auto attachment-shop_catalog size-shop_catalog wp-post-image img-fluid"
-                                                            alt="{{ $magazine->title }}"
-                                                            title="{{ $magazine->title }}">
+                                                            alt="{{ $magazine->title }}" title="{{ $magazine->title }}">
                                                     @endif
                                                 </a>
                                             </div>

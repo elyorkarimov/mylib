@@ -24,7 +24,7 @@ class InventarList extends Component
     public function render()
     {
         if($this->term != ''){
-            $barcodes = BookInventar::where('inventar_number', 'like', '%'.$this->term.'%')
+            $barcodes = BookInventar::where('bar_code', 'like', '%'.$this->term.'%')
             // ->orWhere('gtin', 'like', '%'.$this->term.'%')
             ->orderBy('id', 'desc')->paginate($this->perPage);
         }else{
@@ -33,7 +33,7 @@ class InventarList extends Component
         $data = [
             'barcodes' => $barcodes,
         ];
-
+ 
         return view('livewire.admin.books.inventar-list', $data);
     }
 }

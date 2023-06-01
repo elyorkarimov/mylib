@@ -16,6 +16,7 @@
             </p>
         </div>
         <div>
+            
             <a class="btn btn-success" href="{{ route('books.edit', [app()->getLocale(), $book->id]) }}"> {{ __('Edit') }}</a> | 
 
 

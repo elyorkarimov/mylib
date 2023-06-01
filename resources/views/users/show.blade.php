@@ -82,10 +82,12 @@
                                         @endif
                                     </div>
                                 </div>
+                                
                                 <div class="form-group">
                                     <strong>{{ __('Phone Number') }}:</strong>
                                     {{ $user->profile->phone_number }}
                                 </div>
+
                                 <div class="form-group">
                                     <strong>{{ __('Date Of Birth') }}:</strong>
                                     {{ $user->profile->date_of_birth }}
@@ -104,11 +106,11 @@
                                 </div>
                                 <div class="form-group">
                                     <strong>{{ __('Reference Gender') }}:</strong>
-                                    {!! $user->profile->referenceGender ? $user->profile->referenceGender->title : '' !!}
-                                </div>
+                                    {!! $user->profile->gender_id ? $user->profile->referenceGender->title : '' !!}
+                                </div> 
                                 <div class="form-group">
                                     <strong>{{ __('User Type') }}:</strong>
-                                    {!! $user->profile->userType ? $user->profile->userType->title : '' !!}
+                                    {!! $user->profile->user_type_id ? $user->profile->userType->title : '' !!}
                                 </div>
                                 <div class="form-group">
                                     <strong>{{ __('Organization') }}:</strong>
@@ -117,7 +119,9 @@
 
                                 <div class="form-group">
                                     <strong>{{ __('Branch') }}:</strong>
-                                    {!! $user->profile->branch_id ? $user->profile->branch->title : '' !!}
+                                    @if ($user->profile->branch_id != null && $user->profile->branch !=null)                                    
+                                        {!! $user->profile->branch_id ? $user->profile->branch->title : '' !!}
+                                    @endif
                                 </div>
                                 <div class="form-group">
                                     <strong>{{ __('Department') }}:</strong>
@@ -129,7 +133,10 @@
                                 </div>
                                 <div class="form-group">
                                     <strong>{{ __('Chair') }}:</strong>
-                                    {!! $user->profile->chair_id ? $user->profile->chair->title : '' !!}
+                                    {{$user->profile->chair_id}}
+                                    @if ($user->profile->chair_id)
+                                        {!! $user->profile->chair_id ? $user->profile->chair->title : '' !!}
+                                    @endif
                                 </div>
                                 <div class="form-group">
                                     <strong>{{ __('Group') }}:</strong>
@@ -224,9 +231,9 @@
                 color: white;
                 text-align: center;
                 padding: 5px;
-                font-size: 20px;
+                font-size: 15px;
                 background-color: #8338ec;
-                margin-bottom: 15px;
+                margin-bottom: 10px;
                 text-transform: uppercase;
             }
 
@@ -239,7 +246,9 @@
                 width: 46%;
                 height: 40px;
             }
-
+            .mb-10{
+                margin-bottom: 10px
+            }
         </style>  
 
         <div class="row">
@@ -254,16 +263,16 @@
                                     <div class="row">
                                         <div class="col-md-4">
                                             <div class="top text-center">
-                                                <div class="form-group">
+                                                <div class="">
                                                     @if ($user->profile->image)
                                                         <div class="align-items-left">
-                                                            <img src="/storage/{{ $user->profile->image }}" style="width: 120px;max-width: 150px;">
+                                                            <img src="/storage/{{ $user->profile->image }}" style="width: 120px;max-width: 150px;max-height: 120px;">
                                                         </div>
                                                     @else
                                                         {{ __('No image') }}
                                                     @endif
                                                 </div>
-                                                <div class="form-group">
+                                                <div class="">
                                                     <strong>{{ $user->name }}</strong>
                                                 </div>
                                                 
@@ -271,8 +280,7 @@
                                         </div>
                                         <div class="col-md-7">
                                             <div class="details-info">
-                                                 
-                                                    <div class="form-group text-center" style="line-height: 17px;">
+                                                    <div class=" text-center" style="line-height: 17px;">
                                                         @php
                                                             if ($user->inventar_number) {
                                                                 $generator = new Picqer\Barcode\BarcodeGeneratorPNG();
@@ -283,20 +291,23 @@
                                                         <span>{{ $user->inventar_number }}</span>
                                                     </div>
                                                 
-                                                <div class="form-group">
-                                                    <strong>{{ __('Email') }}:</strong>
-                                                    <span style="display:block; margin-top:8px">{{ $user->email }}</span>
+                                                <div class="mb-10">
+                                                    <b>{{ __('Email') }}:</b> {{ $user->email }}
                                                 </div>
-                                                <div class="form-group">
-                                                    <strong>{{ __('Phone Number') }}:</strong>
-                                                    <span
-                                                        style="display:block; margin-top:8px">{{ $user->profile->phone_number }}</span>
+                                                <div class="mb-10">
+                                                    <b>{{ __('Phone Number') }}:</b> {{ $user->profile->phone_number }}
                                                 </div>
-                                                <div class="form-group">
-                                                    <strong>{{ __('Date Of Birth') }}:</strong>
-                                                    <span
-                                                        style="display:block; margin-top:8px">{{ $user->profile->date_of_birth }}</span>
-                                                </div>
+                                                @if ($user->profile->date_of_birth)
+                                                    <div class="mb-10">
+                                                        <b>{{ __('Date Of Birth') }}:</b> {{ $user->profile->date_of_birth }}
+                                                    </div>                                                    
+                                                @endif
+
+                                                @if ($user->profile->faculty_id)
+                                                    <div class="mb-10">
+                                                        <b>{{ __('Faculty') }}:</b> {!! $user->profile->faculty_id ? $user->profile->faculty->title : '' !!}
+                                                    </div>                                                    
+                                                @endif
                                             </div>
                                         </div>
                                     </div>
@@ -304,7 +315,7 @@
                                     <div class="form-group text-center">
                                         <span style="display:block; margin-top:-12px;line-height: 15px;">
                                             {{-- Toshkent sh. Navoiy ko’chasi, 32 uy, 100011, Telefon(998-71)244-79-20 --}}
-                                        
+                                            {!! $user->profile->organization ? $user->profile->organization->address: '' !!}
                                         </span>
                                     </div>
                                 </div>

@@ -18,6 +18,7 @@
             <a href="{{ route('book-subjects.create', app()->getLocale()) }}" class="btn btn-primary float-right">
                 {{ __('Create') }}  
             </a>
+            
         </div>
     </div>
     <div class="row">
@@ -32,17 +33,15 @@
                                     <th>No</th>
 									<th>{{ __('IsActive') }}</th> 
                                     <th>{{ __('Title') }}</th>
-
-
-
-
+                                    
                                     <th></th>
                                 </tr>
                             </thead>
                             <tbody>
                             @foreach ($bookSubjects as $bookSubject)
-                                    <tr>
-                                        <td>{{ ++$i }}</td>
+                                    <tr class="clickable-row" data-href="{{ route('book-subjects.show', [app()->getLocale(), $bookSubject->id]) }}">
+ 
+                                        <td>{{ $bookSubject->id }}</td>
                                         
                                         <td>{!! $bookSubject->isActive == 1 ? '<span class="badge badge-success"><i class="mdi mdi-check-circle"></i></span>' : '<span class="badge badge-danger"><i class="mdi mdi-close-circle "></i></span>' !!}</td>
                                         <td>{{ $bookSubject->title }}</td>
@@ -56,6 +55,14 @@
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-danger btn-sm">{{ __('Delete') }}</button>
                                             </form>
+                                            @if (Auth::user()->hasRole('SuperAdmin'))
+                                                <br>
+                                                <form method="POST" action="{{ route('book-subjects.delete', [app()->getLocale(), 'id'=>$bookSubject->id]) }}">
+                                                    @csrf
+                                                    <input name="type" type="hidden" value="DELETE">
+                                                    <button type="submit" class="btn btn-sm btn-danger btn-flat show_confirm" data-toggle="tooltip" >{{ __('Delete from DataBase') }}</button>
+                                                </form>                                                    
+                                            @endif
                                         </td>
                                     </tr>
                                 @endforeach                                    

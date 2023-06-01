@@ -27,27 +27,64 @@
                     <div class="card-body">
                         
                         <div class="form-group">
-                            <strong>Order Date:</strong>
+                            <strong>{{ __('Order Date') }}:</strong>
                             {{ $order->order_date }}
                         </div>
                         <div class="form-group">
-                            <strong>Order Number:</strong>
+                            <strong>{{ __('Order Number') }}:</strong>
                             {{ $order->order_number }}
+                        </div> 
+                        <div class="form-group">
+                            <strong>{{ __('Status') }}:</strong>
+                            {!! App\Models\Order::GetStatus($order->status) !!}
                         </div>
                         <div class="form-group">
-                            <strong>Type:</strong>
-                            {{ $order->type }}
+                            <strong>{{ __('Reader') }}:</strong>
+                            {!! $order->reader ? $order->reader->name : '' !!}
+                            <br>
+                            <b>{{ __('Email') }}</b>: <a href="mailTo:{!! $order->reader ? $order->reader->email : '' !!}">{!! $order->reader ? $order->reader->email : '' !!}</a>
+                            <br>
+                            <b>{{ __('Phone Number') }}: </b><a href="tel:{!! $order->reader ? $order->reader->profile->phone_number : '' !!}">{!! $order->reader ? $order->reader->profile->phone_number : '' !!}</a>
                         </div>
-                        <div class="form-group">
-                            <strong>Status:</strong>
-                            {{ $order->status }}
-                        </div>
-                        <div class="form-group">
-                            <strong>Reader Id:</strong>
-                            {{ $order->reader_id }}
-                        </div>
-
+                         
                     </div>
+                    @if($order->orderDetails != null && $order->orderDetails->count()>0)
+                    <div class="card-body">
+                        <div class="table-responsive">
+    
+                            <table class="table table-striped table-hover">
+                                <thead class="thead">
+                                    <tr>
+                                        <th>No</th>
+                                            <th>{{ __('Book') }}</th>
+                                            <th>{{ __('Book face image') }}</th>
+                                            <th>{{ __('Status') }}</th> 
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($order->orderDetails as $orderDet)
+                                        <tr>
+                                            <td>{{ $orderDet->id }}</td>
+                                            <td>{!!\App\Models\Book::GetBibliographicById($orderDet->book_id )!!}
+                                            
+                                            </td>
+                                            <td>
+                                                @if ($orderDet->book->image_path)
+                                                    <img src="/storage/{{ $orderDet->book->image_path}}" width="100px">
+                                                @endif
+                                            </td>
+                                            <td>{!! App\Models\Order::GetStatus($orderDet->status) !!}</td>
+                                            <td>
+                                                {{-- <a class="btn btn-sm btn-primary " href="{{ route('orders.show', [app()->getLocale(), $orderDet->id]) }}"> {{ __('Show') }}</a>     --}}
+                                            </td>
+                                        </tr>
+                                    @endforeach                                    
+                                </tbody>
+                            </table>
+                        </div> 
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>
